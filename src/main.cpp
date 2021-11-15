@@ -1,18 +1,12 @@
 #include <stdio.h>
 #include <iostream>
-#include <json.h>
-#include <fstream>
 #include <string.h>
+#include "instance.h"
 
-using json = nlohmann::json;
 using namespace std;
 
-string INSTANCES_PATH = "../instances/";
-
 int main(int argc, char **argv) {
-    json j;
-    std::ifstream input_stream(INSTANCES_PATH + "reecn3382.instance.json");
-    input_stream >> j;
-    cout << j["id"] << endl;
+    Instance inst("reecn3382.instance.json");
+    cout << inst.id << " has " << inst.n << " vertices and " << inst.m << " edges." << endl;
     return 0;
 }
