@@ -19,6 +19,7 @@ endfunction()
 
 enable_cxx_compiler_flag_if_supported("-Wall")
 enable_cxx_compiler_flag_if_supported("-std=c++11")
+enable_cxx_compiler_flag_if_supported("-fopenmp")
 
 file(GLOB_RECURSE SOURCES 
     ${PROJECT_SOURCE_DIR}/src/*.h
