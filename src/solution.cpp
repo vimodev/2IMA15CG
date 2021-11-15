@@ -16,16 +16,29 @@ void Solution::to_file(string output_dir) {
     output << std::setw(4) << j << std::endl;
 }
 
+// Check if a solution is valid
 bool Solution::check_validity() {
+    // Edges for easy access
     vector<Edge> *edges = this->instance->edges;
-    long intersections = 0;
-    #pragma omp parallel for schedule(dynamic) reduction(+:intersections)
+    bool result = true;
+    // Multi thread this loop
+    #pragma omp parallel for schedule(dynamic)
     for (int i = 1; i < this->instance->m; i++) {
         for (int j = 0; j < i; j++) {
+            // If not the same color, continue
             if (this->colors->at(i) != this->colors->at(j)) continue;
-            intersections += (long) Edge::intersect(&edges->at(i), &edges->at(j));
+            // Check for intersection
+            if (Edge::intersect(&edges->at(i), &edges->at(j))) {
+                // Write result atomically
+                #pragma omp atomic write
+                result = false;
+                // Signal cancellation.
+                #pragma omp cancel for
+            }
+            // Check if any thread issues cancellation
+            #pragma omp cancellation point for
         }
     }
-    cout << intersections << endl;
-    return true;
+    // Return result
+    return result;
 }
