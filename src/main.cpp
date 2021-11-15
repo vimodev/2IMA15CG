@@ -8,8 +8,11 @@ using namespace std;
 
 int main(int argc, char **argv) {
     // Reading instance from json wokrs
-    Instance inst("vispecn70501.instance.json");
+    Instance inst("reecn73116.instance.json");
     cout << inst.id << " has " << inst.vertices->size() << " vertices and " << inst.m << " edges." << endl;
+    Edge e1(1, 1, 5, 2);
+    Edge e2(3, 1, 4, 2);
+    cout << Edge::intersect(&e1, &e2) << endl;
     // Edge intersection works
     long intersections = 0;
     #pragma omp parallel for schedule(dynamic) reduction(+:intersections)
