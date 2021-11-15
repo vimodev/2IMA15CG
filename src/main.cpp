@@ -7,8 +7,17 @@
 using namespace std;
 
 int main(int argc, char **argv) {
-    Instance inst("reecn73116.instance.json");
+    // Reading instance from json wokrs
+    Instance inst("sqrp70811.instance.json");
     cout << inst.id << " has " << inst.vertices->size() << " vertices and " << inst.m << " edges." << endl;
+    // Edge intersection works
+    // #pragma omp parallel for
+    // for (int i = 1; i < inst.m; i++) {
+    //     for (int j = 0; j < i; j++) {
+    //         Edge::intersect(&inst.edges->at(i), &inst.edges->at(j));
+    //     }
+    // }
+    // Writing solution to json works
     Solution sol;
     sol.instance = inst.id;
     sol.type = inst.type;

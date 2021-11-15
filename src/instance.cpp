@@ -23,11 +23,9 @@ Instance::Instance(string filepath) {
     // Populate edges
     this->edges = new vector<Edge>;
     for (int i = 0; i < this->m; i++) {
-        Edge e = {};
         int v1i = j["edge_i"][i];
         int v2i = j["edge_j"][i];
-        e.v1 = &this->vertices->at(v1i);
-        e.v2 = &this->vertices->at(v2i);
+        Edge e(&this->vertices->at(v1i), &this->vertices->at(v2i));
         this->edges->push_back(e);
     }
 }
