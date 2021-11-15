@@ -15,9 +15,12 @@ function(enable_cxx_compiler_flag_if_supported flag)
 endfunction()
 
 enable_cxx_compiler_flag_if_supported("-Wall")
+enable_cxx_compiler_flag_if_supported("-std=c++11")
 
 file(GLOB_RECURSE SOURCES 
     ${PROJECT_SOURCE_DIR}/src/*.h
     ${PROJECT_SOURCE_DIR}/src/*.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCES})
+
+target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/include/nlohmann)
