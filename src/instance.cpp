@@ -13,26 +13,26 @@ Instance::Instance(string filepath) {
     this->n = j["n"];
     this->m = j["m"];
     // Populate vertices
-    this->vertices = (Vertex *) malloc(sizeof(Vertex) * this->n);
+    this->vertices = new vector<Vertex>;
     for (int i = 0; i < this->n; i++) {
         Vertex v = {};
         v.x = j["x"][i];
         v.y = j["y"][i];
-        this->vertices[i] = v;
+        this->vertices->push_back(v);
     }
     // Populate edges
-    this->edges = (Edge *) malloc(sizeof(Edge) * this->m);
+    this->edges = new vector<Edge>;
     for (int i = 0; i < this->m; i++) {
         Edge e = {};
         int v1i = j["edge_i"][i];
         int v2i = j["edge_j"][i];
-        e.v1 = &this->vertices[v1i];
-        e.v2 = &this->vertices[v2i];
-        this->edges[i] = e;
+        e.v1 = &this->vertices->at(v1i);
+        e.v2 = &this->vertices->at(v2i);
+        this->edges->push_back(e);
     }
 }
 
 Instance::~Instance() {
-    free(this->vertices);
-    free(this->edges);
+    delete this->vertices;
+    delete this->edges;
 }

@@ -4,6 +4,7 @@
 #include <string.h>
 #include <fstream>
 #include <iostream>
+#include <vector>
 #include "vertex.h"
 #include "edge.h"
 
@@ -18,8 +19,8 @@ class Instance {
         string id;
         int n;
         int m;
-        Vertex *vertices;
-        Edge *edges;
+        vector<Vertex> *vertices;
+        vector<Edge> *edges;
         Instance(string filepath);
         ~Instance();
     private:
