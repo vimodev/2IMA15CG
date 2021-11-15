@@ -6,6 +6,16 @@ of the 2IMA15 Geometric Algorithm course.
 
 The problem is solving the Minimum Partition into Plane Subgraphs.
 
+## How to build
+
+`mkdir build`
+
+`cd build`
+
+`cmake ..`
+
+`make`
+
 
 ## Checklist
 
