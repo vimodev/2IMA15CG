@@ -15,10 +15,10 @@ const string INSTANCES_PATH = "../instances/";
 
 class Instance {
     public:
-        string type;
-        string id;
-        int n;
-        int m;
+        string type; // Should be Instance_CGSHOP2022
+        string id; // ID of the instance
+        int n; // Amount of vertices
+        int m; // Amount of edges
         vector<Vertex> *vertices;
         vector<Edge> *edges;
         Instance(string filepath);
