@@ -130,12 +130,12 @@ Solution *naive (Instance instance, int debug) {
 int main(int argc, char **argv) {
     // We want to be able to cancel out of OMP parallel sections
     if(!omp_get_cancellation()) {
-        putenv("OMP_CANCELLATION=true");
+        putenv((char*) "OMP_CANCELLATION=true");
         execv(argv[0], argv);
     }
 
     // Seed random
-    srand (time(NULL));
+    srand (time(nullptr)); // NOLINT(cert-msc51-cpp)
 
     for (const auto & entry : fs::directory_iterator("../instances")) {
         string p = entry.path();

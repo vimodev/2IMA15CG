@@ -1,7 +1,7 @@
 #include "instance.h"
 
 // Create a problem instance from a parsed json
-Instance::Instance(string filepath) {
+Instance::Instance(const string& filepath) {
     // Parse the file as a json
     // No robustness TODO
     json j;

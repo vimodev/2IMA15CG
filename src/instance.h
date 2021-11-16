@@ -1,13 +1,13 @@
 #pragma once
 
 #include <json.h>
-#include <string.h>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <vector>
 #include "vertex.h"
 #include "edge.h"
-#include <assert.h>
+#include <cassert>
 
 using json = nlohmann::json;
 using namespace std;
@@ -22,6 +22,6 @@ class Instance {
         int m; // Amount of edges
         vector<Vertex> *vertices;
         vector<Edge> *edges;
-        Instance(string filepath);
+        explicit Instance(const string& filepath);
     private:
 };

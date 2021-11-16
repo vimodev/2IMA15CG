@@ -2,9 +2,11 @@
 
 Solution::Solution(Instance *instance) {
     this->instance = instance;
+    this->num_colors = 0;
+    this->colors = nullptr;
 }
 
-void Solution::to_file(string output_dir, bool include_num, string alg) {
+void Solution::to_file(const string& output_dir, bool include_num, const string& alg) {
     json j;
     j["type"] = "Solution_CGSHOP2022";
     j["instance"] = this->instance->id;
@@ -27,7 +29,7 @@ bool Solution::check_validity() {
     vector<Edge> *edges = this->instance->edges;
     bool result = true;
     // Multi thread this loop
-    #pragma omp parallel for schedule(dynamic)
+    #pragma omp parallel for default(none) schedule(dynamic) shared(result, edges)
     for (int i = 1; i < this->instance->m; i++) {
         for (int j = 0; j < i; j++) {
             // If not the same color, continue
@@ -37,8 +39,6 @@ bool Solution::check_validity() {
                 // Write result atomically
                 #pragma omp atomic write
                 result = false;
-                // Signal cancellation.
-                #pragma omp cancel for
             }
             // Check if any thread issues cancellation
             #pragma omp cancellation point for

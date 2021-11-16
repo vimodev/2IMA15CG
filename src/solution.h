@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string.h>
+#include <cstring>
 #include <json.h>
 #include <fstream>
 #include <vector>
@@ -12,8 +12,8 @@ using json = nlohmann::json;
 
 class Solution {
     public:
-        Solution(Instance *instance);
-        void to_file(string output_dir, bool include_num=false, string alg="");
+        explicit Solution(Instance *instance);
+        void to_file(const string& output_dir, bool include_num=false, const string& alg="");
         bool check_validity();
         Instance *instance;
         int num_colors;
