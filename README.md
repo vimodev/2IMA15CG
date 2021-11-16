@@ -19,8 +19,8 @@ The problem is solving the Minimum Partition into Plane Subgraphs: partitioning 
 
 ## Checklist
 
-- [ ] Add functionality to read test instances
-- [ ] Add functionality to write solutions
+- [x] Add functionality to read test instances
+- [x] Add functionality to write solutions
 - [ ] Add functionality to visualize instances
 - [ ] Define relevant subproblems
 - - [ ] <subproblem 1>
@@ -30,4 +30,3 @@ The problem is solving the Minimum Partition into Plane Subgraphs: partitioning 
 - - [ ] <algorithm for subproblem 2>
 - [ ] Implement an algorithm to solve the main problem
 - [ ] Generate additional test instances
-- [ ] Reach first place in the leaderboard
