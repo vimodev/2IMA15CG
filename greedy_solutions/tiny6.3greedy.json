@@ -1,0 +1,13 @@
+{
+    "colors": [
+        0,
+        0,
+        0,
+        1,
+        1,
+        2
+    ],
+    "instance": "tiny6",
+    "num_colors": 3,
+    "type": "Solution_CGSHOP2022"
+}
