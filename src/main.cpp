@@ -46,7 +46,6 @@ Solution *greedy(Instance instance) {
             break;
         }
         if (done) break;
-        Edge *edge = &instance.edges->at(edge_index);
         
         // Set its color
         colors->at(edge_index) = color;
@@ -57,13 +56,13 @@ Solution *greedy(Instance instance) {
             int c = colors->at(i);
             if (c != -1) continue;
             // If color not set, but intersect with current first edge its already no go
-            if (Edge::intersect(edge, &instance.edges->at(i))) continue;
+            if (IntersectionCache::get(edge_index, i)) continue;
             bool valid = true;
             // Go over all remaining edges that could have same color
             for (int j = edge_index + 1; j < i; j++) {
                 // If they have same color, check for intersect
                 bool colors_equal = colors->at(j) == color;
-                if (colors_equal && Edge::intersect(&instance.edges->at(i), &instance.edges->at(j))) {
+                if (colors_equal && IntersectionCache::get(i, j)) {
                     valid = false;
                     break;
                 }
@@ -172,7 +171,7 @@ int main(int argc, char **argv) {
 
     cout << "Colors used: " << sol->num_colors << endl;
 
-    sol->to_file("", true, "greedy");
+    sol->to_file("", false, "");
 
     return 0;
 }
