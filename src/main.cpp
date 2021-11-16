@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <iostream>
+#include <set>
 #include <string.h>
 #include "instance.h"
 #include "solution.h"
@@ -73,6 +74,51 @@ Solution *greedy(Instance instance) {
     return sol;
 }
 
+Solution *naive (Instance instance, int debug) {
+    // For each edge i to m,
+    // find colors of intersecting edges
+    // add these to set invalid_colors_for_i
+    // then color edge i with the first color
+    // that is not in invalid_colors_for_i
+    std::vector<int> *color_allocation = new vector<int>;
+    for (int i = 0; i < instance.m; i++) {
+        color_allocation->push_back(-1);
+    }
+
+    std::set<int> invalid_colors_for_i = {};
+    for (int i = 0; i < instance.m; i++) {
+        std::set<int> invalid_colors_for_i = {};
+        for (int j = 0; j < i; j++) {
+            if (debug && Edge::intersect(&instance.edges->at(i), &instance.edges->at(j))) cout << "Intersection at edge " << i << " and " << j << endl;
+            if (Edge::intersect(&instance.edges->at(i), &instance.edges->at(j)))
+                invalid_colors_for_i.insert(color_allocation->at(j));
+        }
+        std::set<int>::iterator it = invalid_colors_for_i.begin();
+
+        int c = 0;
+        while (it != invalid_colors_for_i.end() && c == *it) {
+            c++; it++;
+        }
+        color_allocation->at(i) = c;
+
+        it = invalid_colors_for_i.begin();
+        if (debug) cout << "Edge " << i << " cant choose colors: ";
+        while (it != invalid_colors_for_i.end()) {
+            if (debug) cout << *it << ",";
+            it++;
+        }
+        if (debug) cout << endl << "\ttherefore chose color: " << c << endl;
+
+        if (!debug) if (!((i+1) % (instance.m/4))) cout << "PROGRESS: " << (i*100)/instance.m << "%"<< endl;
+    }
+
+    Solution *sol = new Solution(&instance);
+
+    sol->num_colors = *max_element(std::begin(*color_allocation), std::end(*color_allocation))+1;
+    sol->colors = color_allocation;
+    return sol;
+} 
+
 int main(int argc, char **argv) {
     // We want to be able to cancel out of OMP parallel sections
     if(!omp_get_cancellation()) {
@@ -84,10 +130,10 @@ int main(int argc, char **argv) {
     srand (time(NULL));
 
     // Reading instance from json wokrs
-    Instance inst("reecn3382.instance.json");
+    Instance inst("tiny6.instance.json");
     cout << inst.id << " has " << inst.vertices->size() << " vertices and " << inst.edges->size() << " edges." << endl;
 
-    Solution *sol = greedy(inst);
+    Solution *sol = naive(inst, 1);
 
     if(sol->check_validity()) {
         cout << "Solution valid!" << endl;
