@@ -50,7 +50,7 @@ Solution *greedy(Instance instance) {
             if (Edge::intersect(edge, &instance.edges->at(i))) continue;
             bool valid = true;
             // Go over all remaining edges that could have same color
-            for (int j = edge_index + 2; j < i; j++) {
+            for (int j = edge_index + 1; j < i; j++) {
                 // If they have same color, check for intersect
                 bool colors_equal = colors->at(j) == color;
                 if (colors_equal && Edge::intersect(&instance.edges->at(i), &instance.edges->at(j))) {
@@ -130,10 +130,10 @@ int main(int argc, char **argv) {
     srand (time(NULL));
 
     // Reading instance from json wokrs
-    Instance inst("tiny6.instance.json");
+    Instance inst("reecn3382.instance.json");
     cout << inst.id << " has " << inst.vertices->size() << " vertices and " << inst.edges->size() << " edges." << endl;
 
-    Solution *sol = naive(inst, 1);
+    Solution *sol = greedy(inst);
 
     if(sol->check_validity()) {
         cout << "Solution valid!" << endl;
@@ -143,7 +143,7 @@ int main(int argc, char **argv) {
 
     cout << "Colors used: " << sol->num_colors << endl;
 
-    sol->to_file("../out/");
+    sol->to_file("");
 
     return 0;
 }

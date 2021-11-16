@@ -15,9 +15,7 @@ Instance::Instance(string filepath) {
     // Populate vertices
     this->vertices = new vector<Vertex>;
     for (int i = 0; i < this->n; i++) {
-        Vertex v = {};
-        v.x = j["x"][i];
-        v.y = j["y"][i];
+        Vertex v(j["x"][i], j["y"][i]);
         this->vertices->push_back(v);
     }
     // Populate edges
