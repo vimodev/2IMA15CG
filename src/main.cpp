@@ -5,11 +5,14 @@
 #include "instance.h"
 #include "solution.h"
 #include <stdlib.h>
+#include <filesystem>
 #include <time.h>
 #include <unistd.h>
 #include <omp.h>
 
 using namespace std;
+
+namespace fs = std::filesystem;
 
 /**
  * Greedy solver that colors the first uncolored edge with a color
@@ -134,21 +137,39 @@ int main(int argc, char **argv) {
     // Seed random
     srand (time(NULL));
 
-    // Reading instance from json wokrs
-    Instance inst("reecn54867.instance.json");
-    cout << inst.id << " has " << inst.vertices->size() << " vertices and " << inst.edges->size() << " edges." << endl;
-
-    Solution *sol = greedy(inst);
-
-    if(sol->check_validity()) {
-        cout << "Solution valid!" << endl;
-    } else {
-        cout << "Solution invalid!" << endl;
+    for (const auto & entry : fs::directory_iterator("../instances")) {
+        string p = entry.path();
+        Instance inst(p);
+        cout << "Solving " << inst.id << "..." << endl;
+        Solution *sol = greedy(inst);
+        if(sol->check_validity()) {
+            cout << "Solution valid!" << endl;
+        } else {
+            cout << "Solution invalid!" << endl;
+        }
+        sol->to_file("../greedy_solutions/", true, "greedy");
+        delete sol->colors;
+        delete sol;
+        delete inst.edges;
+        delete inst.vertices;
     }
 
-    cout << "Colors used: " << sol->num_colors << endl;
+    // // Reading instance from json wokrs
+    // Instance inst("visp29489.instance.json");
+    // cout << inst.id << " has " << inst.vertices->size() << " vertices and " << inst.edges->size() << " edges." << endl;
 
-    sol->to_file("");
+    // Solution *sol = greedy(inst);
+    // // Solution *sol = naive(inst, 0);
+
+    // if(sol->check_validity()) {
+    //     cout << "Solution valid!" << endl;
+    // } else {
+    //     cout << "Solution invalid!" << endl;
+    // }
+
+    // cout << "Colors used: " << sol->num_colors << endl;
+
+    // sol->to_file("../greedysolutions/", true, "greedy");
 
     return 0;
 }

@@ -13,7 +13,7 @@ using json = nlohmann::json;
 class Solution {
     public:
         Solution(Instance *instance);
-        void to_file(string output_dir);
+        void to_file(string output_dir, bool include_num=false, string alg="");
         bool check_validity();
         Instance *instance;
         int num_colors;

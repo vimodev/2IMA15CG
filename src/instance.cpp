@@ -5,7 +5,7 @@ Instance::Instance(string filepath) {
     // Parse the file as a json
     // No robustness TODO
     json j;
-    std::ifstream input_stream(INSTANCES_PATH + filepath);
+    std::ifstream input_stream(filepath);
     input_stream >> j;
     // Copy the meta data
     this->type = j["type"];

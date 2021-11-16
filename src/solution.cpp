@@ -4,14 +4,19 @@ Solution::Solution(Instance *instance) {
     this->instance = instance;
 }
 
-void Solution::to_file(string output_dir) {
+void Solution::to_file(string output_dir, bool include_num, string alg) {
     json j;
     j["type"] = "Solution_CGSHOP2022";
     j["instance"] = this->instance->id;
     j["num_colors"] = this->num_colors;
     json j_list(*this->colors);
     j["colors"] = j_list;
-    string filepath = output_dir + this->instance->id + ".json";
+    string filepath;
+    if (include_num) {
+        filepath = output_dir + this->instance->id + "." + to_string(this->num_colors) + alg + ".json";
+    } else {
+        filepath = output_dir + this->instance->id + ".json";
+    }
     std::ofstream output(filepath);
     output << std::setw(4) << j << std::endl;
 }
