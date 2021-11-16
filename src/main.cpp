@@ -10,6 +10,8 @@
 #include <unistd.h>
 #include <omp.h>
 
+#include "intersection_cache.h"
+
 using namespace std;
 
 namespace fs = std::filesystem;
@@ -137,39 +139,40 @@ int main(int argc, char **argv) {
     // Seed random
     srand (time(nullptr)); // NOLINT(cert-msc51-cpp)
 
-    for (const auto & entry : fs::directory_iterator("../instances")) {
-        string p = entry.path();
-        Instance inst(p);
-        cout << "Solving " << inst.id << "..." << endl;
-        Solution *sol = greedy(inst);
-        if(sol->check_validity()) {
-            cout << "Solution valid!" << endl;
-        } else {
-            cout << "Solution invalid!" << endl;
-        }
-        sol->to_file("../greedy_solutions/", true, "greedy");
-        delete sol->colors;
-        delete sol;
-        delete inst.edges;
-        delete inst.vertices;
-    }
-
-    // // Reading instance from json wokrs
-    // Instance inst("visp29489.instance.json");
-    // cout << inst.id << " has " << inst.vertices->size() << " vertices and " << inst.edges->size() << " edges." << endl;
-
-    // Solution *sol = greedy(inst);
-    // // Solution *sol = naive(inst, 0);
-
-    // if(sol->check_validity()) {
-    //     cout << "Solution valid!" << endl;
-    // } else {
-    //     cout << "Solution invalid!" << endl;
+    // for (const auto & entry : fs::directory_iterator("../instances")) {
+    //     string p = entry.path();
+    //     Instance inst(p);
+    //     cout << "Solving " << inst.id << "..." << endl;
+    //     Solution *sol = greedy(inst);
+    //     if(sol->check_validity()) {
+    //         cout << "Solution valid!" << endl;
+    //     } else {
+    //         cout << "Solution invalid!" << endl;
+    //     }
+    //     sol->to_file("../greedy_solutions/", true, "greedy");
+    //     delete sol->colors;
+    //     delete sol;
+    //     delete inst.edges;
+    //     delete inst.vertices;
     // }
 
-    // cout << "Colors used: " << sol->num_colors << endl;
+    // Reading instance from json wokrs
+    Instance inst("../instances/vispecn70501.instance.json");
+    cout << inst.id << " has " << inst.vertices->size() << " vertices and " << inst.edges->size() << " edges." << endl;
+    IntersectionCache::set_instance(&inst);
 
-    // sol->to_file("../greedysolutions/", true, "greedy");
+    Solution *sol = greedy(inst);
+    // Solution *sol = naive(inst, 0);
+
+    if(sol->check_validity()) {
+        cout << "Solution valid!" << endl;
+    } else {
+        cout << "Solution invalid!" << endl;
+    }
+
+    cout << "Colors used: " << sol->num_colors << endl;
+
+    sol->to_file("", true, "greedy");
 
     return 0;
 }
