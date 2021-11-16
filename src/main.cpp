@@ -11,6 +11,11 @@
 
 using namespace std;
 
+/**
+ * Greedy solver that colors the first uncolored edge with a color
+ * and then goes over all remaining uncolored edges to check for collisions with edges of the new color
+ * and if there are none we give it the same color.
+ */
 Solution *greedy(Instance instance) {
 
     // Initialize colors
@@ -130,7 +135,7 @@ int main(int argc, char **argv) {
     srand (time(NULL));
 
     // Reading instance from json wokrs
-    Instance inst("reecn3382.instance.json");
+    Instance inst("reecn54867.instance.json");
     cout << inst.id << " has " << inst.vertices->size() << " vertices and " << inst.edges->size() << " edges." << endl;
 
     Solution *sol = greedy(inst);
