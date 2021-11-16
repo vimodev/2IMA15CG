@@ -1,2 +1,4 @@
 build/
 .vscode/
+verify/coloring_verifier*
+**/__pycache__

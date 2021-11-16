@@ -6,7 +6,7 @@ Solution::Solution(Instance *instance) {
 
 void Solution::to_file(string output_dir) {
     json j;
-    j["type"] = this->instance->type;
+    j["type"] = "Solution_CGSHOP2022";
     j["instance"] = this->instance->id;
     j["num_colors"] = this->num_colors;
     json j_list(*this->colors);

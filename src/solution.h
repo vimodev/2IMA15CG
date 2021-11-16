@@ -5,6 +5,7 @@
 #include <fstream>
 #include <vector>
 #include "instance.h"
+#include <iostream>
 
 using namespace std;
 using json = nlohmann::json;

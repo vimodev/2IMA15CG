@@ -7,6 +7,7 @@
 #include <vector>
 #include "vertex.h"
 #include "edge.h"
+#include <assert.h>
 
 using json = nlohmann::json;
 using namespace std;
@@ -22,6 +23,5 @@ class Instance {
         vector<Vertex> *vertices;
         vector<Edge> *edges;
         Instance(string filepath);
-        ~Instance();
     private:
 };

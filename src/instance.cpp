@@ -28,9 +28,6 @@ Instance::Instance(string filepath) {
         Edge e(&this->vertices->at(v1i), &this->vertices->at(v2i));
         this->edges->push_back(e);
     }
-}
-
-Instance::~Instance() {
-    delete this->vertices;
-    delete this->edges;
+    assert((long unsigned int) this->n == this->vertices->size());
+    assert((long unsigned int) this->m == this->edges->size());
 }

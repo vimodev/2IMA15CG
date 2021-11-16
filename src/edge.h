@@ -1,6 +1,9 @@
 #pragma once
 
 #include "vertex.h"
+#include <iostream>
+
+using namespace std;
 
 class Edge {
     public:
