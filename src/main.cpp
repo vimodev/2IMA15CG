@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
 
     cout << "Colors used: " << sol->num_colors << endl;
 
-    sol->to_file("");
+    sol->to_file("../out/");
 
     return 0;
 }
