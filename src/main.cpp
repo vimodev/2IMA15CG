@@ -2,8 +2,6 @@
 #include <iostream>
 #include <set>
 #include <string.h>
-#include "instance.h"
-#include "solution.h"
 #include <stdlib.h>
 #include <filesystem>
 #include <time.h>
@@ -11,6 +9,9 @@
 #include <omp.h>
 
 #include "intersection_cache.h"
+#include "instance.h"
+#include "solution.h"
+#include "adjacency_list.h"
 
 using namespace std;
 
@@ -159,17 +160,19 @@ int main(int argc, char **argv) {
     Instance inst("../instances/vispecn70501.instance.json");
     cout << inst.id << " has " << inst.vertices->size() << " vertices and " << inst.edges->size() << " edges." << endl;
     IntersectionCache::set_instance(&inst);
+    AdjacencyList::initialize();
 
     Solution *sol = greedy(inst);
     // Solution *sol = naive(inst, 0);
+
+    cout << "Solution found. Colors used: " << sol->num_colors << endl;
+    cout << "Checking validity..." << endl;
 
     if(sol->check_validity()) {
         cout << "Solution valid!" << endl;
     } else {
         cout << "Solution invalid!" << endl;
     }
-
-    cout << "Colors used: " << sol->num_colors << endl;
 
     sol->to_file("", false, "");
 
