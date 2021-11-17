@@ -7,6 +7,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <omp.h>
+#include <random>
 
 #include "intersection_cache.h"
 #include "instance.h"
@@ -84,50 +85,46 @@ Solution *greedy(Instance instance) {
     return sol;
 }
 
-Solution *naive (Instance instance, int debug) {
-    // For each edge i to m,
-    // find colors of intersecting edges
-    // add these to set invalid_colors_for_i
-    // then color edge i with the first color
-    // that is not in invalid_colors_for_i
-    std::vector<int> *color_allocation = new vector<int>;
-    for (int i = 0; i < instance.m; i++) {
-        color_allocation->push_back(-1);
-    }
-
-    std::set<int> invalid_colors_for_i = {};
-    for (int i = 0; i < instance.m; i++) {
-        std::set<int> invalid_colors_for_i = {};
-        for (int j = 0; j < i; j++) {
-            if (debug && Edge::intersect(&instance.edges->at(i), &instance.edges->at(j))) cout << "Intersection at edge " << i << " and " << j << endl;
-            if (Edge::intersect(&instance.edges->at(i), &instance.edges->at(j)))
-                invalid_colors_for_i.insert(color_allocation->at(j));
-        }
-        std::set<int>::iterator it = invalid_colors_for_i.begin();
-
-        int c = 0;
-        while (it != invalid_colors_for_i.end() && c == *it) {
-            c++; it++;
-        }
-        color_allocation->at(i) = c;
-
-        it = invalid_colors_for_i.begin();
-        if (debug) cout << "Edge " << i << " cant choose colors: ";
-        while (it != invalid_colors_for_i.end()) {
-            if (debug) cout << *it << ",";
-            it++;
-        }
-        if (debug) cout << endl << "\ttherefore chose color: " << c << endl;
-
-        if (!debug) if (!((i+1) % (instance.m/4))) cout << "PROGRESS: " << (i*100)/instance.m << "%"<< endl;
-    }
-
+Solution *improved_greedy (Instance instance, int N) {
     Solution *sol = new Solution(&instance);
+    sol->colors = new vector<int>;
+    vector<int>* vertices = new vector<int>;
+    for (int i = 0; i < instance.m; i++) {
+        sol->colors->push_back(-1);
+        vertices->push_back(i);
+    }
 
-    sol->num_colors = *max_element(std::begin(*color_allocation), std::end(*color_allocation))+1;
-    sol->colors = color_allocation;
+    for (int iteration = 0; iteration < N; iteration++) {
+        vector< set<int> >* parts = new vector< set<int> >;
+        parts->push_back({});
+    
+        for (int i = 0; i < instance.m; i++) {
+            if (AdjacencyList::neighbours(i) == 0) {
+                parts->at(0).insert(i);
+                sol->colors->at(i) = 0;
+                goto skip;
+            }
+
+            for (int p = 0; p < parts->size(); p++) {
+                for (int v : parts->at(p)) if (IntersectionCache::get(i, v)) goto next;
+                parts->at(p).insert(i);
+                sol->colors->at(i) = p;
+                goto skip;
+                next:;
+            }
+            parts->push_back({i});
+            sol->colors->at(i) = parts->size()-1;
+            skip:;
+        }
+
+        vertices = new vector<int>;
+        random_shuffle(parts->begin(), parts->end());
+        for (int p = 0; p < parts->size(); p++) for (int v : parts->at(p)) vertices->push_back(v);
+        sol->num_colors = parts->size();
+    }
+
     return sol;
-} 
+}
 
 int main(int argc, char **argv) {
     // We want to be able to cancel out of OMP parallel sections
@@ -162,8 +159,7 @@ int main(int argc, char **argv) {
     IntersectionCache::set_instance(&inst);
     AdjacencyList::initialize();
 
-    Solution *sol = greedy(inst);
-    // Solution *sol = naive(inst, 0);
+    Solution *sol = improved_greedy(inst, 10);
 
     cout << "Solution found. Colors used: " << sol->num_colors << endl;
     cout << "Checking validity..." << endl;
