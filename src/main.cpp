@@ -58,13 +58,13 @@ Solution *greedy(Instance instance) {
             int c = colors->at(i);
             if (c != -1) continue;
             // If color not set, but intersect with current first edge its already no go
-            if (IntersectionCache::get(edge_index, i)) continue;
+            if (IntersectionCache::intersects(edge_index, i)) continue;
             bool valid = true;
             // Go over all remaining edges that could have same color
             for (int j = edge_index + 1; j < i; j++) {
                 // If they have same color, check for intersect
                 bool colors_equal = colors->at(j) == color;
-                if (colors_equal && IntersectionCache::get(i, j)) {
+                if (colors_equal && IntersectionCache::intersects(i, j)) {
                     valid = false;
                     break;
                 }
@@ -99,14 +99,14 @@ Solution *improved_greedy (Instance instance, int N) {
         parts->push_back({});
     
         for (int i = 0; i < instance.m; i++) {
-            if (AdjacencyList::neighbours(i) == 0) {
+            if (IntersectionCache::get_count(i) == 0) {
                 parts->at(0).insert(i);
                 sol->colors->at(i) = 0;
                 goto skip;
             }
 
             for (int p = 0; p < parts->size(); p++) {
-                for (int v : parts->at(p)) if (IntersectionCache::get(i, v)) goto next;
+                for (int v : parts->at(p)) if (IntersectionCache::intersects(i, v)) goto next;
                 parts->at(p).insert(i);
                 sol->colors->at(i) = p;
                 goto skip;
@@ -122,6 +122,48 @@ Solution *improved_greedy (Instance instance, int N) {
         for (int p = 0; p < parts->size(); p++) for (int v : parts->at(p)) vertices->push_back(v);
         sol->num_colors = parts->size();
     }
+
+    return sol;
+}
+
+Solution *dsatur (Instance instance) {
+    Solution *sol = new Solution(&instance);
+    sol->colors = new vector<int>;
+    for (int i = 0; i < instance.m; i++) {
+        sol->colors->push_back(-1);
+    }
+
+    vector< set<int> >* parts = new vector< set<int> >;
+    parts->push_back({});
+
+    vector<int>* vertices = new vector<int>;
+    for (int i = 0; i < instance.m; i++) {
+        vertices->push_back(IntersectionCache::get_count(i));
+    }
+
+    for (int _ : *vertices) {
+        int i = max_element(vertices->begin(), vertices->end()) - vertices->begin();
+        vertices->at(i) = -999999;
+
+        if (IntersectionCache::get_count(i) == 0) {
+            parts->at(0).insert(i);
+            sol->colors->at(i) = 0;
+            goto skip;
+        }
+
+        for (int p = 0; p < parts->size(); p++) {
+            for (int v : parts->at(p)) if (IntersectionCache::intersects(i, v)) goto next;
+            parts->at(p).insert(i);
+            sol->colors->at(i) = p;
+            goto skip;
+            next:;
+        }
+        parts->push_back({i});
+        sol->colors->at(i) = parts->size()-1;
+        skip:;
+    }
+
+    sol->num_colors = parts->size();
 
     return sol;
 }
@@ -157,9 +199,9 @@ int main(int argc, char **argv) {
     Instance inst("../instances/vispecn70501.instance.json");
     cout << inst.id << " has " << inst.vertices->size() << " vertices and " << inst.edges->size() << " edges." << endl;
     IntersectionCache::set_instance(&inst);
-    AdjacencyList::initialize();
+    //AdjacencyList::initialize();
 
-    Solution *sol = improved_greedy(inst, 10);
+    Solution *sol = dsatur(inst);
 
     cout << "Solution found. Colors used: " << sol->num_colors << endl;
     cout << "Checking validity..." << endl;

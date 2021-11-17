@@ -25,7 +25,7 @@ void AdjacencyList::initialize() {
 void AdjacencyList::populate() {
     for (int i = 0; i < IntersectionCache::instance->m; i++) {
         for (int j = i + 1; j < IntersectionCache::instance->m; j++) {
-            if (IntersectionCache::get(i, j)) {
+            if (IntersectionCache::intersects(i, j)) {
                 adjacency_list[i]->push_back(j);
                 adjacency_list[j]->push_back(i);
             }
