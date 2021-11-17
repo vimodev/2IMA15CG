@@ -85,7 +85,7 @@ Solution *greedy(Instance instance) {
     return sol;
 }
 
-Solution *improved_greedy (Instance instance, int N) {
+Solution *iterative_greedy (Instance instance, int N) {
     Solution *sol = new Solution(&instance);
     sol->colors = new vector<int>;
     vector<int>* vertices = new vector<int>;
@@ -126,7 +126,7 @@ Solution *improved_greedy (Instance instance, int N) {
     return sol;
 }
 
-Solution *dsatur (Instance instance) {
+Solution *degree_greedy (Instance instance) {
     Solution *sol = new Solution(&instance);
     sol->colors = new vector<int>;
     for (int i = 0; i < instance.m; i++) {
@@ -201,7 +201,7 @@ int main(int argc, char **argv) {
     IntersectionCache::set_instance(&inst);
     //AdjacencyList::initialize();
 
-    Solution *sol = dsatur(inst);
+    Solution *sol = degree_greedy(inst);
 
     cout << "Solution found. Colors used: " << sol->num_colors << endl;
     cout << "Checking validity..." << endl;
