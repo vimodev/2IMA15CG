@@ -39,6 +39,8 @@ bool Solution::check_validity() {
                 // Write result atomically
                 #pragma omp atomic write
                 result = false;
+                // Signal cancellation.
+                #pragma omp cancel for
             }
             // Check if any thread issues cancellation
             #pragma omp cancellation point for
