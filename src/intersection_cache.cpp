@@ -6,13 +6,13 @@ Instance *IntersectionCache::instance = nullptr;
 bool IntersectionCache::initialized = false;
 
 // Set the given instance to be cached for intersections
-void IntersectionCache::set_instance(Instance *instance) {
-    IntersectionCache::instance = instance;
+void IntersectionCache::set_instance(Instance *pInstance) {
+    IntersectionCache::instance = pInstance;
     
-    vector<Edge> *edges = instance->edges;
+    vector<Edge> *edges = pInstance->edges;
     #pragma omp parallel for schedule(dynamic)
-    for (int i = 0; i < instance->m; i++) {
-        for (int j = i + 1; j < instance->m; j++) {
+    for (int i = 0; i < pInstance->m; i++) {
+        for (int j = i + 1; j < pInstance->m; j++) {
             int intersect = Edge::intersect(&edges->at(i), &edges->at(j));
             if (intersect) {
                 counts[i] += 1;

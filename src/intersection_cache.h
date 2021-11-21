@@ -12,7 +12,7 @@ using namespace std;
 
 class IntersectionCache {
     public:
-        static void set_instance(Instance *instance);
+        static void set_instance(Instance *pInstance);
         static bool intersects(int i, int j);
         static int get_count(int i);
         static bool initialized;
@@ -21,5 +21,4 @@ class IntersectionCache {
     private:
         static bitset<MAX_EDGES> cache[MAX_EDGES];
         static int counts[MAX_EDGES];
-        static void populate_cache();
 };
