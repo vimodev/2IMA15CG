@@ -6,9 +6,11 @@
  * Base class for solvers.
  */
 class AbstractSolver {
-    public:
+public:
+
     AbstractSolver() = default;
-        virtual Solution *solve(Instance instance) = 0;
+    virtual string getName() = 0;
+    virtual Solution *solve(Instance instance) = 0;
 };
 
 /**
@@ -16,21 +18,35 @@ class AbstractSolver {
  * and then goes over all remaining uncolored edges to check for collisions with edges of the new color
  * and if there are none we give it the same color.
  */
-class GreedySolver: AbstractSolver{
-    public:
+class GreedySolver : public AbstractSolver {
+public:
+    string getName() override {
+        return "GreedySolver";
+    };
+
+
     Solution *solve(Instance instance) override;
 };
 
-class IterativeGreedySolver: AbstractSolver{
+class IterativeGreedySolver : public AbstractSolver {
 public:
-    IterativeGreedySolver(int N): AbstractSolver() {
+    IterativeGreedySolver(int N) : AbstractSolver() {
         this->N = N;
     }
+
     int N = 0;
+    string getName() override {
+        return "IterativeGreedySolver";
+    };
+
     Solution *solve(Instance instance) override;
 };
 
-class DegreeGreedySolver: AbstractSolver{
+class DegreeGreedySolver : public AbstractSolver {
 public:
+    string getName() override {
+        return "DegreeGreedySolver";
+    };
+
     Solution *solve(Instance instance) override;
 };

@@ -28,6 +28,7 @@ bool Solution::check_validity() {
     // Edges for easy access
     vector<Edge> *edges = this->instance->edges;
     bool result = true;
+
     // Multi thread this loop
     #pragma omp parallel for default(none) schedule(dynamic) shared(result, edges)
     for (int i = 1; i < this->instance->m; i++) {

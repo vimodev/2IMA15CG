@@ -13,6 +13,33 @@ using namespace std;
 
 namespace fs = std::filesystem;
 
+void benchmark(AbstractSolver* solver){
+    string name = "../benchmark-" + solver->getName() + ".csv";
+    std::ofstream benchmarkFile(name);
+    for (const auto & entry : fs::directory_iterator("../instances")) {
+        benchmarkFile.open(name, fstream::app);
+        string p = entry.path();
+        Instance inst(p);
+        cout << "Solving " << inst.id << "..." << endl;
+        IntersectionCache::set_instance(&inst);
+        Solution *sol = solver->solve(inst);
+
+        if(sol->check_validity()) {
+            cout << "Solution valid!" << endl;
+        } else {
+            cout << "Solution invalid!" << endl;
+        }
+
+        sol->to_file("../benchmark/", true, solver->getName());
+        benchmarkFile << inst.id << "," << sol->num_colors << "\n";
+        benchmarkFile.close();
+        delete sol->colors;
+        delete sol;
+        delete inst.edges;
+        delete inst.vertices;
+    }
+}
+
 int main(int argc, char **argv) {
     // We want to be able to cancel out of OMP parallel sections
     if(!omp_get_cancellation()) {
@@ -23,22 +50,10 @@ int main(int argc, char **argv) {
     // Seed random
     srand (time(nullptr)); // NOLINT(cert-msc51-cpp)
 
-    // for (const auto & entry : fs::directory_iterator("../instances")) {
-    //     string p = entry.path();
-    //     Instance inst(p);
-    //     cout << "Solving " << inst.id << "..." << endl;
-    //     Solution *sol = greedy(inst);
-    //     if(sol->check_validity()) {
-    //         cout << "Solution valid!" << endl;
-    //     } else {
-    //         cout << "Solution invalid!" << endl;
-    //     }
-    //     sol->to_file("../greedy_solutions/", true, "greedy");
-    //     delete sol->colors;
-    //     delete sol;
-    //     delete inst.edges;
-    //     delete inst.vertices;
-    // }
+    AbstractSolver* solver = new DegreeGreedySolver();
+    benchmark(solver);
+    solver = new GreedySolver();
+    benchmark(solver);
 
     // Reading instance from json wokrs
     Instance inst("../instances/vispecn70501.instance.json");
@@ -47,8 +62,8 @@ int main(int argc, char **argv) {
     //AdjacencyList::initialize();
 
 //    Solution *sol = degree_greedy(inst);
-//    Solution *sol = IterativeGreedySolver(5).solve(inst);
-    Solution *sol = GreedySolver().solve(inst);
+//    Solution *sol = IterativeGreedySolver(10).solve(inst);
+    Solution *sol = DegreeGreedySolver().solve(inst);
 
     cout << "Solution found. Colors used: " << sol->num_colors << endl;
     cout << "Checking validity..." << endl;
@@ -59,7 +74,7 @@ int main(int argc, char **argv) {
         cout << "Solution invalid!" << endl;
     }
 
-    sol->to_file("", false, "");
+    sol->to_file("../solutions/", true, "");
 
     return 0;
 }
