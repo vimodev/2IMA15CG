@@ -1,10 +1,10 @@
 #include "tabu_search.h"
 #include "../intersection_cache.h"
 
-int TabuSearchSolver::T[MAX_EDGES][MAX_COLORS];
-int TabuSearchSolver::C[MAX_EDGES][MAX_COLORS];
+int TabuSearch::T[MAX_EDGES][MAX_COLORS];
+int TabuSearch::C[MAX_EDGES][MAX_COLORS];
 
-Solution *TabuSearchSolver::solve(Solution* sol, int iterations) {
+Solution *TabuSearch::solve(Solution* sol, int iterations) {
     int n = sol->instance->m;
     int k = sol->num_colors;
 
