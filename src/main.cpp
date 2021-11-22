@@ -14,7 +14,7 @@ using namespace std;
 namespace fs = std::filesystem;
 
 void benchmark(AbstractSolver* solver){
-    string name = "../benchmark-" + solver->getName() + ".csv";
+    string name = "../benchmark/benchmark-" + solver->getName() + ".csv";
     std::ofstream benchmarkFile(name);
     for (const auto & entry : fs::directory_iterator("../instances")) {
         benchmarkFile.open(name, fstream::app);
@@ -30,7 +30,7 @@ void benchmark(AbstractSolver* solver){
             cout << "Solution invalid!" << endl;
         }
 
-        sol->to_file("../benchmark/", true, solver->getName());
+        sol->to_file("../benchmark/solutions/", true, solver->getName());
         benchmarkFile << inst.id << "," << sol->num_colors << "\n";
         benchmarkFile.close();
         delete sol->colors;
@@ -49,11 +49,6 @@ int main(int argc, char **argv) {
 
     // Seed random
     srand (time(nullptr)); // NOLINT(cert-msc51-cpp)
-
-    AbstractSolver* solver = new DegreeGreedySolver();
-    benchmark(solver);
-    solver = new GreedySolver();
-    benchmark(solver);
 
     // Reading instance from json wokrs
     Instance inst("../instances/vispecn70501.instance.json");
