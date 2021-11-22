@@ -2,9 +2,6 @@
 
 #include "solution.h"
 
-#define MAX_EDGES 100000
-#define MAX_COLORS 1000
-
 /**
  * Base class for solvers.
  */
@@ -70,16 +67,4 @@ public:
 
     int N;
     Solution *solve(Instance instance) override;
-};
-
-class TabuSearchSolver : public AbstractSolver {
-public:
-    string getName() override {
-        return "TabuSearchSolver";
-    };
-
-    Solution *solve(Instance instance) override;
-private:
-    static int T[MAX_EDGES][MAX_COLORS];
-    static int C[MAX_EDGES][MAX_COLORS];
 };

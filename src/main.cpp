@@ -8,6 +8,7 @@
 #include "instance.h"
 #include "solution.h"
 #include "solvers.h"
+#include "solvers/tabu_search.h"
 
 using namespace std;
 
@@ -58,7 +59,9 @@ int main(int argc, char **argv) {
 
 //    Solution *sol = degree_greedy(inst);
 //    Solution *sol = IterativeGreedySolver(10).solve(inst);
-    Solution *sol = DSaturSolver().solve(inst);
+    Solution *sol = new Solution(&inst);
+    sol->initialize(99);
+    TabuSearchSolver().solve(sol, 10000);
 
     cout << "Solution found. Colors used: " << sol->num_colors << endl;
     cout << "Checking validity..." << endl;
