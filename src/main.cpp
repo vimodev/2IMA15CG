@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
     srand (time(nullptr)); // NOLINT(cert-msc51-cpp)
 
     // Reading instance from json wokrs
-    Instance inst("../instances/vispecn70501.instance.json");
+    Instance inst("../instances/reecn3382.instance.json");
     cout << inst.id << " has " << inst.vertices->size() << " vertices and " << inst.edges->size() << " edges." << endl;
     IntersectionCache::set_instance(&inst);
     //AdjacencyList::initialize();

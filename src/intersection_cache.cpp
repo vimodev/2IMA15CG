@@ -23,15 +23,25 @@ void IntersectionCache::set_instance(Instance *pInstance) {
             if (intersect) {
                 counts[i] += 1;
                 counts[j] += 1;
-                adjacency_list[i]->push_back(j);
-                adjacency_list[j]->push_back(i);
             }
             cache[i][j] = intersect;
         }
     }
 
-    IntersectionCache::initialized = true;
     cout << "Intersection cache filled." << endl;
+
+    // Since we cant atomically push_back we do it like this instead.
+    #pragma omp parallel for schedule(dynamic)
+    for (int i = 0; i < pInstance->m; i++) {
+        for (int j = 0; j < pInstance->m; j++) {
+            if (intersects(i, j)) {
+                adjacency_list[i]->push_back(j);
+            }
+        }
+    }
+
+    IntersectionCache::initialized = true;
+    cout << "Adjacency cache filled." << endl;
 }
 
 bool IntersectionCache::intersects(int i, int j) {
