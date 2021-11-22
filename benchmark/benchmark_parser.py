@@ -53,11 +53,13 @@ def calculate_score():
     score = pd.DataFrame(benchmarks.iloc[:, 1:len(benchmarks.columns) - 1].idxmin(axis=1))
     score = score.rename(columns={0: 'Best'})
     score = score.join(benchmarks)
-    score = score.groupby(['Category', 'Best'], as_index=False).count().iloc[:, 0:3]
     print(score.to_string())
+    score = score.groupby(['Category', 'Best'], as_index=False).count().iloc[:, 0:3]
+    # print(score.to_string())
 
 
 if __name__ == '__main__':
     benchmarks = load_benchmarks()
     set_categories()
+    # print(benchmarks.to_string())
     calculate_score()

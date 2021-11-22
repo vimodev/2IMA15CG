@@ -50,3 +50,12 @@ public:
 
     Solution *solve(Instance instance) override;
 };
+
+class DSaturSolver: public AbstractSolver {
+public:
+    string getName() override {
+        return "DSaturSolver";
+    };
+
+    Solution *solve(Instance instance) override;
+};

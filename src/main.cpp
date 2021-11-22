@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
 
 //    Solution *sol = degree_greedy(inst);
 //    Solution *sol = IterativeGreedySolver(10).solve(inst);
-    Solution *sol = DegreeGreedySolver().solve(inst);
+    Solution *sol = DSaturSolver().solve(inst);
 
     cout << "Solution found. Colors used: " << sol->num_colors << endl;
     cout << "Checking validity..." << endl;
