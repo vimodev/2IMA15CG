@@ -28,7 +28,7 @@ Solution *DSaturSolver::solve(Instance instance) {
     for (int _ : *verticesSaturation) {
         // Get index of element with max saturation.
         int i = max_element(verticesSaturation->begin(), verticesSaturation->end()) - verticesSaturation->begin();
-        verticesSaturation->at(i) = -999999;
+        verticesSaturation->at(i) = numeric_limits<int>::min();
 
         // If the vertex has no neighbours set it to 0
         if (IntersectionCache::get_count(i) == 0) {
