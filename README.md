@@ -22,11 +22,15 @@ The problem is solving the Minimum Partition into Plane Subgraphs: partitioning 
 - [x] Add functionality to read test instances
 - [x] Add functionality to write solutions
 - [ ] Add functionality to visualize instances
-- [ ] Define relevant subproblems
-- - [ ] <subproblem 1>
-- - [ ] <subproblem 2>
+- [x] Define relevant subproblems
+- - [x] Subproblem 1: Transform to graph coloring problem
+- - [x] Subproblem 2: Solve graph coloring problem
 - [ ] Implement algorithms to solve the defined subproblems 
-- - [ ] <algorithm for subproblem 1>
-- - [ ] <algorithm for subproblem 2>
+- - [x] Transformation to graph coloring instance
+- - [x] Greedy algorithm for graph coloring
+- - [x] Greedy (degree variant) algorithm for graph coloring
+- - [x] Greedy (saturation variant) algorithm for graph coloring
+- - [ ] Tabu search algorithm for graph coloring
+- - [ ] Evolutionary algorithm for graph coloring
 - [ ] Implement an algorithm to solve the main problem
 - [ ] Generate additional test instances
