@@ -2,6 +2,9 @@
 
 #include "solution.h"
 
+#define MAX_EDGES 100000
+#define MAX_COLORS 1000
+
 /**
  * Base class for solvers.
  */
@@ -20,25 +23,29 @@ public:
  */
 class GreedySolver : public AbstractSolver {
 public:
+    GreedySolver(int N = numeric_limits<int>::max()) : AbstractSolver() {
+        this->N = N;
+    }
+
     string getName() override {
         return "GreedySolver";
     };
 
-
+    int N;
     Solution *solve(Instance instance) override;
 };
 
 class IterativeGreedySolver : public AbstractSolver {
 public:
-    IterativeGreedySolver(int N) : AbstractSolver() {
+    IterativeGreedySolver(int N = 1) : AbstractSolver() {
         this->N = N;
     }
 
-    int N = 0;
     string getName() override {
         return "IterativeGreedySolver";
     };
 
+    int N;
     Solution *solve(Instance instance) override;
 };
 
@@ -53,9 +60,26 @@ public:
 
 class DSaturSolver: public AbstractSolver {
 public:
+    DSaturSolver(int N = numeric_limits<int>::max()) : AbstractSolver() {
+        this->N = N;
+    }
+
     string getName() override {
         return "DSaturSolver";
     };
 
+    int N;
     Solution *solve(Instance instance) override;
+};
+
+class TabuSearchSolver : public AbstractSolver {
+public:
+    string getName() override {
+        return "TabuSearchSolver";
+    };
+
+    Solution *solve(Instance instance) override;
+private:
+    static int T[MAX_EDGES][MAX_COLORS];
+    static int C[MAX_EDGES][MAX_COLORS];
 };

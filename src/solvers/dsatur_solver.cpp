@@ -2,6 +2,10 @@
 #include "../intersection_cache.h"
 
 Solution *DSaturSolver::solve(Instance instance) {
+    random_device rd; // obtain a random number from hardware
+    mt19937 gen(rd()); // seed the generator
+    uniform_int_distribution<> distr(0, this->N-1); // define the range
+
     auto *sol = new Solution(&instance);
 
     // Set every color to -1
@@ -52,8 +56,14 @@ Solution *DSaturSolver::solve(Instance instance) {
             next:;
         }
 
-        parts->push_back({i});
-        sol->colors->at(i) = parts->size()-1;
+        if (parts->size() < this->N) {
+            parts->push_back({i});
+            sol->colors->at(i) = parts->size()-1;
+        } else {
+            int c = distr(gen);
+            parts->at(c).insert(i);
+            sol->colors->at(i) = c;
+        }
 
         // Increase saturation of neighbours
         for (int n : *IntersectionCache::neighbours(i)) {

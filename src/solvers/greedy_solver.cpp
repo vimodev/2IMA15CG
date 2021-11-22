@@ -2,6 +2,9 @@
 #include "../intersection_cache.h"
 
 Solution* GreedySolver::solve(Instance instance) {
+    random_device rd; // obtain a random number from hardware
+    mt19937 gen(rd()); // seed the generator
+    uniform_int_distribution<> distr(0, this->N-1); // define the range
 
     // Initialize colors
     vector<int> *colors = new vector<int>;
@@ -9,23 +12,22 @@ Solution* GreedySolver::solve(Instance instance) {
         colors->push_back(-1);
     }
 
-    int color = 0;
-    bool done = false;
     int edge_index = 0;
+    int color;
 
-    while (!done) {
+    for (color = 0; color < this->N; color++) {
 
         // Find first uncolored edge
-        done = true;
         while (edge_index < instance.m) {
             if (colors->at(edge_index) != -1) {
                 edge_index++;
-                continue;
+            } else {
+                goto brk;
             }
-            done = false;
-            break;
         }
-        if (done) break;
+        break;
+
+        brk:;
 
         // Set its color
         colors->at(edge_index) = color;
@@ -51,10 +53,12 @@ Solution* GreedySolver::solve(Instance instance) {
                 colors->at(i) = color;
             }
         }
+    }
 
-        // Continue with the next color
-        color++;
-
+    for (int i = 0; i < instance.m; i++) {
+        if (colors->at(i) == -1) {
+            colors->at(i) = distr(gen);
+        }
     }
 
     Solution *sol = new Solution(&instance);
