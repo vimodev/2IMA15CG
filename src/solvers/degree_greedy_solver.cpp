@@ -18,7 +18,7 @@ Solution *DegreeGreedySolver::solve(Instance instance) {
 
     for (int _ : *vertices) {
         int i = max_element(vertices->begin(), vertices->end()) - vertices->begin();
-        vertices->at(i) = -999999;
+        vertices->at(i) = numeric_limits<int>::min();
 
         if (IntersectionCache::get_count(i) == 0) {
             parts->at(0).insert(i);
