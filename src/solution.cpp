@@ -6,6 +6,23 @@ Solution::Solution(Instance *instance) {
     this->colors = nullptr;
 }
 
+int Solution::initialize(int num_colors) {
+    random_device rd; // obtain a random number from hardware
+    mt19937 gen(rd()); // seed the generator
+    uniform_int_distribution<> distr(0, num_colors-1); // define the range
+
+    // Initialize colors
+    vector<int> *colors = new vector<int>;
+    for (int i = 0; i < this->instance->m; i++) {
+        colors->push_back(distr(gen));
+    }
+
+    this->num_colors = num_colors;
+    this->colors = colors;
+
+    return 0;
+}
+
 void Solution::to_file(const string& output_dir, bool include_num, const string& alg) {
     json j;
     j["type"] = "Solution_CGSHOP2022";
@@ -49,4 +66,28 @@ bool Solution::check_validity() {
     }
     // Return result
     return result;
+}
+
+// Get the number of clashes (wrong colorings) in a solution
+int Solution::get_clashes() {
+    // Edges for easy access
+    vector<Edge> *edges = this->instance->edges;
+    int clashes = 0;
+    
+    // Multi thread this loop
+    #pragma omp parallel for default(none) schedule(dynamic) shared(clashes, edges)
+    for (int i = 1; i < this->instance->m; i++) {
+        for (int j = 0; j < i; j++) {
+            // If not the same color, continue
+            if (this->colors->at(i) != this->colors->at(j)) continue;
+            // Check for intersection
+            if (Edge::intersect(&edges->at(i), &edges->at(j))) {
+                // Write result atomically
+                #pragma omp atomic write
+                clashes = clashes + 1;
+            }
+        }
+    }
+    // Return result
+    return clashes;
 }
