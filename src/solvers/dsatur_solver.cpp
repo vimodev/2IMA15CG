@@ -1,5 +1,5 @@
 #include "../solvers.h"
-#include "../intersection_cache.h"
+#include "../cache.h"
 
 Solution *DSaturSolver::solve(Instance instance) {
     random_device rd; // obtain a random number from hardware
@@ -31,7 +31,7 @@ Solution *DSaturSolver::solve(Instance instance) {
         verticesSaturation->at(i) = numeric_limits<int>::min();
 
         // If the vertex has no neighbours set it to 0
-        if (IntersectionCache::get_count(i) == 0) {
+        if (Cache::get_count(i) == 0) {
             parts->at(0).insert(i);
             sol->colors->at(i) = 0;
             goto skip;
@@ -40,14 +40,14 @@ Solution *DSaturSolver::solve(Instance instance) {
         // Else we add it to the first possible part.
         for (int p = 0; p < parts->size(); p++) {
             // If i has a neighbour in part p we skip.
-            for (int v : parts->at(p)) if (IntersectionCache::intersects(i, v)) goto next;
+            for (int v : parts->at(p)) if (Cache::intersects(i, v)) goto next;
 
             // First suitable neighbour found.
             parts->at(p).insert(i);
             sol->colors->at(i) = p;
 
             // Increase saturation of neighbours
-            for (int n : *IntersectionCache::neighbours(i)) {
+            for (int n : *Cache::neighbours(i)) {
                 verticesSaturation->at(n) = verticesSaturation->at(n) + 1;
             }
 
@@ -66,7 +66,7 @@ Solution *DSaturSolver::solve(Instance instance) {
         }
 
         // Increase saturation of neighbours
-        for (int n : *IntersectionCache::neighbours(i)) {
+        for (int n : *Cache::neighbours(i)) {
             verticesSaturation->at(n) = verticesSaturation->at(n) + 1;
         }
 

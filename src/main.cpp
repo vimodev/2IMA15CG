@@ -4,11 +4,11 @@
 #include <unistd.h>
 #include <omp.h>
 
-#include "intersection_cache.h"
+#include "cache.h"
 #include "instance.h"
 #include "solution.h"
 #include "solvers.h"
-#include "solvers/tabu_search.h"
+#include "searchers.h"
 
 using namespace std;
 
@@ -22,7 +22,7 @@ void benchmark(AbstractSolver* solver){
         string p = entry.path();
         Instance inst(p);
         cout << "Solving " << inst.id << "..." << endl;
-        IntersectionCache::set_instance(&inst);
+        Cache::set_instance(&inst);
         Solution *sol = solver->solve(inst);
 
         if(sol->check_validity()) {
@@ -54,14 +54,13 @@ int main(int argc, char **argv) {
     // Reading instance from json wokrs
     Instance inst("../instances/reecn3382.instance.json");
     cout << inst.id << " has " << inst.vertices->size() << " vertices and " << inst.edges->size() << " edges." << endl;
-    IntersectionCache::set_instance(&inst);
-    //AdjacencyList::initialize();
+    Cache::set_instance(&inst);
 
 //    Solution *sol = degree_greedy(inst);
 //    Solution *sol = IterativeGreedySolver(10).solve(inst);
     Solution *sol = new Solution(&inst);
-    sol->initialize(200);
-    TabuSearch().solve(sol, 10000);
+    sol->initialize(150);
+    TabuSearcher().search(sol, 100000);
 
     cout << "Solution found. Colors used: " << sol->num_colors << endl;
     cout << "Checking validity..." << endl;

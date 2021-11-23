@@ -10,7 +10,7 @@
 
 using namespace std;
 
-class IntersectionCache {
+class Cache {
     public:
         static void set_instance(Instance *pInstance);
         static bool intersects(int i, int j);

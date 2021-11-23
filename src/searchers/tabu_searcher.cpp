@@ -1,21 +1,21 @@
-#include "tabu_search.h"
-#include "../intersection_cache.h"
+#include "../searchers.h"
+#include "../cache.h"
 
-int TabuSearch::T[MAX_EDGES][MAX_COLORS];
-int TabuSearch::C[MAX_EDGES][MAX_COLORS];
+int TabuSearcher::T[MAX_EDGES][MAX_COLORS];
+int TabuSearcher::C[MAX_EDGES][MAX_COLORS];
 
-Solution *TabuSearch::solve(Solution* sol, int iterations) {
+Solution *TabuSearcher::search(Solution* sol, int iterations) {
     int n = sol->instance->m;
     int k = sol->num_colors;
 
     #pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < n; i++) {
-        if (IntersectionCache::get_count(i) == 0) {
+        if (Cache::get_count(i) == 0) {
             for (int j = 0; j < n; j++) {
                 C[i][j] = numeric_limits<int>::max();
             }
         }
-        for (int j : *IntersectionCache::neighbours(i)) {
+        for (int j : *Cache::neighbours(i)) {
             C[i][sol->colors->at(j)] = C[i][sol->colors->at(j)] + 1;
         }
     }
@@ -39,7 +39,7 @@ Solution *TabuSearch::solve(Solution* sol, int iterations) {
         best_c = numeric_limits<int>::max();
 
         for (int i = 0; i < n; i++) {
-            if (IntersectionCache::get_count(i) == 0) continue;
+            if (Cache::get_count(i) == 0) continue;
             for (int j = 0; j < k; j++) {
                 if (j == sol->colors->at(i)) continue;
                 int clashes = cur_c + C[i][j] - C[i][sol->colors->at(i)];
@@ -61,7 +61,7 @@ Solution *TabuSearch::solve(Solution* sol, int iterations) {
         best_i = get<0>(bests->at(best));
         best_j = get<1>(bests->at(best));
 
-        for (int u : *IntersectionCache::neighbours(best_i)) {
+        for (int u : *Cache::neighbours(best_i)) {
             C[u][sol->colors->at(best_i)] = C[u][sol->colors->at(best_i)] - 1;
             C[u][best_j] = C[u][best_j] + 1;
         }

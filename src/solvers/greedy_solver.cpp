@@ -1,5 +1,5 @@
 #include "../solvers.h"
-#include "../intersection_cache.h"
+#include "../cache.h"
 
 Solution* GreedySolver::solve(Instance instance) {
     random_device rd; // obtain a random number from hardware
@@ -38,13 +38,13 @@ Solution* GreedySolver::solve(Instance instance) {
             int c = colors->at(i);
             if (c != -1) continue;
             // If color not set, but intersect with current first edge its already no go
-            if (IntersectionCache::intersects(edge_index, i)) continue;
+            if (Cache::intersects(edge_index, i)) continue;
             bool valid = true;
             // Go over all remaining edges that could have same color
             for (int j = edge_index + 1; j < i; j++) {
                 // If they have same color, check for intersect
                 bool colors_equal = colors->at(j) == color;
-                if (colors_equal && IntersectionCache::intersects(i, j)) {
+                if (colors_equal && Cache::intersects(i, j)) {
                     valid = false;
                     break;
                 }

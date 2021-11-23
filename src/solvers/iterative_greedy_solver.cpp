@@ -1,5 +1,5 @@
 #include "../solvers.h"
-#include "../intersection_cache.h"
+#include "../cache.h"
 
 Solution *IterativeGreedySolver::solve(Instance instance) {
     Solution *sol = new Solution(&instance);
@@ -15,14 +15,14 @@ Solution *IterativeGreedySolver::solve(Instance instance) {
         parts->push_back({});
 
         for (int i = 0; i < instance.m; i++) {
-            if (IntersectionCache::get_count(i) == 0) {
+            if (Cache::get_count(i) == 0) {
                 parts->at(0).insert(i);
                 sol->colors->at(i) = 0;
                 goto skip;
             }
 
             for (int p = 0; p < parts->size(); p++) {
-                for (int v : parts->at(p)) if (IntersectionCache::intersects(i, v)) goto next;
+                for (int v : parts->at(p)) if (Cache::intersects(i, v)) goto next;
                 parts->at(p).insert(i);
                 sol->colors->at(i) = p;
                 goto skip;

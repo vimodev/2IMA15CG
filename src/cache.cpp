@@ -1,14 +1,14 @@
-#include "intersection_cache.h"
+#include "cache.h"
 
-bitset<MAX_EDGES> IntersectionCache::cache[MAX_EDGES];
-int IntersectionCache::counts[MAX_EDGES];
-Instance *IntersectionCache::instance = nullptr;
-bool IntersectionCache::initialized = false;
-vector<int> *IntersectionCache::adjacency_list[MAX_EDGES];
+bitset<MAX_EDGES> Cache::cache[MAX_EDGES];
+int Cache::counts[MAX_EDGES];
+Instance *Cache::instance = nullptr;
+bool Cache::initialized = false;
+vector<int> *Cache::adjacency_list[MAX_EDGES];
 
 // Set the given instance to be cached for intersections
-void IntersectionCache::set_instance(Instance *pInstance) {
-    IntersectionCache::instance = pInstance;
+void Cache::set_instance(Instance *pInstance) {
+    Cache::instance = pInstance;
 
     // Initialize adjacency_lists with empty vectors.
     for (int i = 0; i < pInstance->m; i++) {
@@ -40,19 +40,19 @@ void IntersectionCache::set_instance(Instance *pInstance) {
         }
     }
 
-    IntersectionCache::initialized = true;
+    Cache::initialized = true;
     cout << "Adjacency cache filled." << endl;
 }
 
-bool IntersectionCache::intersects(int i, int j) {
+bool Cache::intersects(int i, int j) {
     if (i > j) return cache[j][i];
     return cache[i][j];
 }
 
-int IntersectionCache::get_count(int i) {
+int Cache::get_count(int i) {
     return counts[i];
 }
 
-vector<int> *IntersectionCache::neighbours(int i) {
+vector<int> *Cache::neighbours(int i) {
     return adjacency_list[i];
 }
