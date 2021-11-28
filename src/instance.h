@@ -12,6 +12,9 @@
 using json = nlohmann::json;
 using namespace std;
 
+#define MAX_EDGES 50000
+#define MAX_COLORS 100
+
 const string INSTANCES_PATH = "../instances/";
 
 class Instance {

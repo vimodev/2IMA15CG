@@ -4,8 +4,8 @@
 #include <unistd.h>
 #include <omp.h>
 
-#include "cache.h"
 #include "instance.h"
+#include "cache.h"
 #include "solution.h"
 #include "solvers.h"
 #include "searchers.h"
@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
 //    Solution *sol = IterativeGreedySolver(10).solve(inst);
     Solution *sol = new Solution(&inst);
     sol->initialize(150);
-    TabuSearcher().search(sol, 100000);
+    TabuSearcher().search(sol, 1000);
 
     cout << "Solution found. Colors used: " << sol->num_colors << endl;
     cout << "Checking validity..." << endl;

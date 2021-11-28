@@ -2,9 +2,6 @@
 
 #include "solution.h"
 
-#define MAX_EDGES 100000
-#define MAX_COLORS 1000
-
 /**
  * Base class for solvers.
  */

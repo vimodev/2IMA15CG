@@ -6,8 +6,6 @@
 #include "instance.h"
 #include <vector>
 
-#define MAX_EDGES 100000
-
 using namespace std;
 
 class Cache {
