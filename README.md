@@ -30,7 +30,7 @@ The problem is solving the Minimum Partition into Plane Subgraphs: partitioning 
 - - [x] Greedy algorithm for graph coloring
 - - [x] Greedy (degree variant) algorithm for graph coloring
 - - [x] Greedy (saturation variant) algorithm for graph coloring
-- - [ ] Tabu search algorithm for graph coloring
+- - [x] Tabu search algorithm for graph coloring
 - - [ ] Evolutionary algorithm for graph coloring
 - [ ] Implement an algorithm to solve the main problem
 - [ ] Generate additional test instances
