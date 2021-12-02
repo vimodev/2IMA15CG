@@ -2,7 +2,7 @@
 #include "../cache.h"
 
 // Greedy solver based on Degreedy
-// Samuel Oosterholt
+// Maxim Snoep
 Solution *DegreeGreedySolver::solve(Instance instance) {
     Solution *sol = new Solution(&instance);
     sol->colors = new vector<int>;
