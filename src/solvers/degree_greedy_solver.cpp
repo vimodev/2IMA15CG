@@ -1,6 +1,8 @@
 #include "../solvers.h"
 #include "../cache.h"
 
+// Greedy solver based on Degreedy
+// Samuel Oosterholt
 Solution *DegreeGreedySolver::solve(Instance instance) {
     Solution *sol = new Solution(&instance);
     sol->colors = new vector<int>;

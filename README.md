@@ -6,6 +6,12 @@ of the 2IMA15 Geometric Algorithm course.
 
 The problem is solving the Minimum Partition into Plane Subgraphs: partitioning a graph into a minimum number of planar subgraphs. A related problem (partitioning into a minimum number of plane spanning trees) is tackled in https://arxiv.org/pdf/1707.05440.pdf.
 
+## Source files explanation
+
+Source files can be seperated into data structures and solvers/searchers. Solvers and searchers are located in their respective directories in src/. Data structures include basic problem Instance and Solution classes, alongside Edges and Vertices. Auxilliary data structures like a 2d bitmap cache for efficient access are also located in the main src/ folder.
+
+The instances/ folder contains the problem instances defined by the challenge. benchmark/ contains a script to benchmark new implementations against previous ones. verify/ contains the provided tools for verifying solutions locally. include/ contains third-party libraries such as a json parser for c++.
+
 ## How to build
 
 `mkdir build`

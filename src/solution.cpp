@@ -1,11 +1,15 @@
 #include "solution.h"
 
+// Create a solution based on instance
+// Vincent Moonen
 Solution::Solution(Instance *instance) {
     this->instance = instance;
     this->num_colors = 0;
     this->colors = nullptr;
 }
 
+// Fill random solution
+// Maxim Snoep
 int Solution::initialize(int num_colors) {
     random_device rd; // obtain a random number from hardware
     mt19937 gen(rd()); // seed the generator
@@ -23,6 +27,8 @@ int Solution::initialize(int num_colors) {
     return 0;
 }
 
+// Write solution to output file
+// Vincent Moonen
 void Solution::to_file(const string& output_dir, bool include_num, const string& alg) {
     json j;
     j["type"] = "Solution_CGSHOP2022";
@@ -41,6 +47,7 @@ void Solution::to_file(const string& output_dir, bool include_num, const string&
 }
 
 // Check if a solution is valid
+// Vincent Moonen
 bool Solution::check_validity() {
     // Edges for easy access
     vector<Edge> *edges = this->instance->edges;
@@ -69,6 +76,7 @@ bool Solution::check_validity() {
 }
 
 // Get the number of clashes (wrong colorings) in a solution
+// Maxim Snoep
 int Solution::get_clashes() {
     // Edges for easy access
     vector<Edge> *edges = this->instance->edges;

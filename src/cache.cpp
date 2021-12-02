@@ -1,5 +1,8 @@
 #include "cache.h"
 
+// Implementation to store intersection results for rapid access
+// Vincent Moonen
+
 bitset<MAX_EDGES> Cache::cache[MAX_EDGES];
 int Cache::counts[MAX_EDGES];
 Instance *Cache::instance = nullptr;
@@ -7,6 +10,7 @@ bool Cache::initialized = false;
 vector<int> *Cache::adjacency_list[MAX_EDGES];
 
 // Set the given instance to be cached for intersections
+// Vincent Moonen
 void Cache::set_instance(Instance *pInstance) {
     Cache::instance = pInstance;
 

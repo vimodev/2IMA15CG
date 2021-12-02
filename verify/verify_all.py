@@ -3,6 +3,9 @@ from cgshop2022utils.io import read_instance, read_solution
 import sys
 from os import listdir
 
+# Verify all solutions using official tool
+# Vincent Moonen
+
 INSTANCE_DIRECTORY = "../instances/"
 SOLUTION_DIRECTORY = "../greedy_solutions/"
 

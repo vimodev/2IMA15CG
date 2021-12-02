@@ -1,6 +1,8 @@
 #include "../solvers.h"
 #include "../cache.h"
 
+// Basic greedy edge coloring solver, good for benchmark score
+// Vincent Moonen
 Solution* GreedySolver::solve(Instance instance) {
     random_device rd; // obtain a random number from hardware
     mt19937 gen(rd()); // seed the generator

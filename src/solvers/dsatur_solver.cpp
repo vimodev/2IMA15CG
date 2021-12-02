@@ -1,6 +1,8 @@
 #include "../solvers.h"
 #include "../cache.h"
 
+// DSatur solver for graph coloring, based on vertex color 'saturation'
+// Samuel Oosterholt
 Solution *DSaturSolver::solve(Instance instance) {
     random_device rd; // obtain a random number from hardware
     mt19937 gen(rd()); // seed the generator

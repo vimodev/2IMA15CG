@@ -1,6 +1,8 @@
 #include "../solvers.h"
 #include "../cache.h"
 
+// Basic iterative greedy solver for edge coloring
+// Maxim Snoep
 Solution *IterativeGreedySolver::solve(Instance instance) {
     Solution *sol = new Solution(&instance);
     sol->colors = new vector<int>;

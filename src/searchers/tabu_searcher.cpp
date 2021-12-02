@@ -4,6 +4,8 @@
 int TabuSearcher::T[MAX_EDGES][MAX_COLORS];
 int TabuSearcher::C[MAX_EDGES][MAX_COLORS];
 
+// Tabu Searcher for graph coloring
+// Maxim Snoep
 Solution *TabuSearcher::search(Solution* sol, int iterations) {
     int n = sol->instance->m;
     int k = sol->num_colors;
