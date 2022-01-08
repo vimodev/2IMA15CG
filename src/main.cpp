@@ -52,15 +52,10 @@ int main(int argc, char **argv) {
     srand (time(nullptr)); // NOLINT(cert-msc51-cpp)
 
     // Reading instance from json wokrs
-    Instance inst("../instances/reecn3382.instance.json");
+    Instance inst(argv[1]);
     cout << inst.id << " has " << inst.vertices->size() << " vertices and " << inst.edges->size() << " edges." << endl;
     Cache::set_instance(&inst);
-
-//    Solution *sol = degree_greedy(inst);
-//    Solution *sol = IterativeGreedySolver(10).solve(inst);
-    Solution *sol = new Solution(&inst);
-    sol->initialize(150);
-    TabuSearcher().search(sol, 1000);
+    Solution *sol = GreedySolver().solve(inst);
 
     cout << "Solution found. Colors used: " << sol->num_colors << endl;
     cout << "Checking validity..." << endl;
