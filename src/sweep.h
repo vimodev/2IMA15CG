@@ -27,7 +27,7 @@ class Event {
     public:
         Event(long double x, long double y, int e1, int e2, EventType type);
         friend bool operator<(Event const& lhs, Event const& rhs) {
-            return lhs.p.y > rhs.p.y;
+            return lhs.p.y < rhs.p.y;
         };
         Point p;
         int e1;

@@ -23,17 +23,20 @@ void Cache::set_instance(Instance *pInstance) {
     vector<Edge> *edges = pInstance->edges;
 
     Sweepline::sweep(edges);
-    int sum = 0;
-    for (int i = 0; i < pInstance->m; i++) {
-        sum += counts[i];
-    }
-    sum /= 2;
-    cout << sum << endl;
+    // int sum = 0;
+    // for (int i = 0; i < pInstance->m; i++) {
+    //     sum += counts[i];
+    // }
+    // sum /= 2;
+    // cout << sum << endl;
 
     #pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < pInstance->m; i++) {
         for (int j = i + 1; j < pInstance->m; j++) {
             int intersect = Edge::intersect(&edges->at(i), &edges->at(j));
+            if (intersect && !cache[i][j]) {
+                cout << "Missed " << i << ", " << j << endl;
+            }
             if (intersect) {
                 counts[i] += 1;
                 counts[j] += 1;
@@ -41,13 +44,6 @@ void Cache::set_instance(Instance *pInstance) {
             cache[i][j] = intersect;
         }
     }
-
-    sum = 0;
-    for (int i = 0; i < pInstance->m; i++) {
-        sum += counts[i];
-    }
-    sum /= 2;
-    cout << sum << endl;
 
     cout << "Intersection cache filled." << endl;
 

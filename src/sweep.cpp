@@ -54,6 +54,23 @@ static void insert_endpoints(priority_queue<Event> *Q) {
     }
 }
 
+static Point getUpper(Edge e) {
+    Vertex *v1 = e.v1;
+    Vertex *v2 = e.v2;
+    if (v1->y > v2->y) return {(long double)v1->x, (long double)v1->y};
+    if (v1->y < v2->y) return {(long double)v2->x, (long double)v2->y};
+    if (v1->x < v2->x) return {(long double)v1->x, (long double)v1->y};
+    return {(long double)v2->x, (long double)v2->y};
+}
+
+// Was p1 handled before p2?
+static bool before(Point p1, Point p2) {
+    if (p1.y > p2.y) return true;
+    if (p1.y < p2.y) return false;
+    if (p1.x < p2.x) return true;
+    return false;
+}
+
 Point intersection_point(int i1, int i2) {
     auto e1 = S->at(i1); auto e2 = S->at(i2);
     long double x1 = e1.v1->x; long double y1 = e1.v1->y;
@@ -100,6 +117,7 @@ static long double getKey(int edge) {
 
 static void handle_event(Event e, priority_queue<Event> *Q, multimap<long double, int> *T) {
     if (e.type == UPPER) {
+        // cout << "Handling upper endpoint (" << e.p.x << "," << e.p.y << ") of edge " << e.e1 << endl;
         Edge *edge = &S->at(e.e1);
         // Insert the segment s at point p
         T->insert({e.p.x, e.e1});
@@ -111,11 +129,14 @@ static void handle_event(Event e, priority_queue<Event> *Q, multimap<long double
         // Go over all equal neighbours
         for (auto iter = left_range.first; iter != left_range.second; iter++) {
             Edge *other = &S->at(iter->second);
+            // If other is above or left<= the intersection will have been noted already
+            // if (before(getUpper(*other), getUpper(*edge))) continue;
             // If they intersect
             if (Edge::intersect(edge, other)) {
                 // Add the event
                 Point intersection = intersection_point(e.e1, iter->second);
                 Q->emplace(intersection.x, intersection.y, iter->second, e.e1, INTERSECT);
+                // cout << iter->second << " " << e.e1 << " added to queue" << endl;
             }
         }
         // Check right for collision
@@ -123,14 +144,17 @@ static void handle_event(Event e, priority_queue<Event> *Q, multimap<long double
         // Go over all neighbours >
         for (auto iter = right_range.first; iter != right_range.second; iter++) {
             Edge *other = &S->at(iter->second);
+            // if (before(getUpper(*other), getUpper(*edge))) continue;
             // If they intersect
             if (Edge::intersect(edge, other)) {
                 // Add the event
                 Point intersection = intersection_point(e.e1, iter->second);
                 Q->emplace(intersection.x, intersection.y, e.e1, iter->second, INTERSECT);
+                // cout << e.e1 << " " << iter->second << " added to queue" << endl;
             }
         }
     } else if (e.type == LOWER) {
+        // cout << "Handling lower endpoint (" << e.p.x << "," << e.p.y << ") of edge " << e.e1 << endl;
         Edge *edge = &S->at(e.e1);
         // Find the x of the other endpoint
         long double key = getKey(e.e1);
@@ -149,11 +173,13 @@ static void handle_event(Event e, priority_queue<Event> *Q, multimap<long double
                     if (intersection.y < e.p.y) {
                         // If its below sweepline add it
                         Q->emplace(intersection.x, intersection.y, left->second, right->second, INTERSECT);
+                        // cout << left->second << " " << right->second << " added to queue" << endl;
                     }
                 }
             }
         }
     } else if (e.type == INTERSECT) {
+        if (Cache::intersects(e.e1, e.e2)) return;
         // Get left info
         long double left_key = getKey(e.e1);
         auto left_loc = getIterator(T, left_key, e.e1);
@@ -181,6 +207,7 @@ static void handle_event(Event e, priority_queue<Event> *Q, multimap<long double
                 Point intersection = intersection_point(right_edge, iter->second);
                 if (intersection.y < e.p.y) {
                     Q->emplace(intersection.x, intersection.y, iter->second, right_edge, INTERSECT);
+                    // cout << iter->second << " " << right_edge << " added to queue" << endl;
                 }
             }
         }
@@ -195,7 +222,8 @@ static void handle_event(Event e, priority_queue<Event> *Q, multimap<long double
                 // Add the event if they intersect below
                 Point intersection = intersection_point(left_edge, iter->second);
                 if (intersection.y < e.p.y) {
-                    Q->emplace(intersection.x, intersection.y, iter->second, left_edge, INTERSECT);
+                    Q->emplace(intersection.x, intersection.y, left_edge, iter->second, INTERSECT);
+                    // cout << left_edge << " " << iter->second << " added to queue" << endl;
                 }
             }
         }
@@ -208,6 +236,7 @@ static void handle_event(Event e, priority_queue<Event> *Q, multimap<long double
             i = right_edge;
             j = left_edge;
         }
+        // cout << i << " " << j << " intersect at (" << e.p.x << "," << e.p.y << ")" << endl;
         Cache::cache[i][j] = true;
         Cache::counts[i]++;
         Cache::counts[j]++;
