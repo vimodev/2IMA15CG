@@ -4,7 +4,10 @@
 
 using namespace std;
 
-void sweepline(vector<Edge> S);
+class Sweepline {
+    public:
+        static void sweep(vector<Edge> *S);
+};
 
 class Point {
     public:
@@ -14,14 +17,20 @@ class Point {
      long double y;
 };
 
+enum EventType {
+    UPPER,
+    LOWER,
+    INTERSECT
+};
+
 class Event {
     public:
-        Event(long double x, long double y, Edge *e1, Edge *e2, const string& type);
+        Event(long double x, long double y, int e1, int e2, EventType type);
         friend bool operator<(Event const& lhs, Event const& rhs) {
             return lhs.p.y > rhs.p.y;
         };
         Point p;
-        Edge *e1;
-        Edge *e2;
-        string type;
+        int e1;
+        int e2;
+        EventType type;
 };

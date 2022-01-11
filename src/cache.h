@@ -16,9 +16,8 @@ class Cache {
         static bool initialized;
         static vector<int> *neighbours(int i);
         static Instance *instance;
-
-    private:
         static vector<int> *adjacency_list[MAX_EDGES];
         static bitset<MAX_EDGES> cache[MAX_EDGES];
         static int counts[MAX_EDGES];
+        
 };
