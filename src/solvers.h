@@ -68,3 +68,21 @@ public:
     int N;
     Solution *solve(Instance instance) override;
 };
+
+class EvolutionarySolver : public AbstractSolver {
+public:
+    EvolutionarySolver(int N, int pop_size = 10, int local_iters = 100) : AbstractSolver() {
+        this->pop_size = pop_size;
+        this->local_iters = local_iters;
+        this->N = N;
+    }
+
+    string getName() override {
+        return "EvolutionarySolver";
+    };
+
+    int pop_size;
+    int local_iters;
+    int N;
+    Solution *solve(Instance instance) override;
+};

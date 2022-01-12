@@ -25,10 +25,10 @@ class TabuSearcher: public AbstractSearcher {
         static int C[MAX_EDGES][MAX_COLORS];
 };
 
-class EvolutionarySearcher: public AbstractSearcher {
+class IterativeSearcher: public AbstractSearcher {
     public:
         string getName() override {
-            return "EvolutionarySearcher";
+            return "IterativeSearcher";
         };
 
         Solution *search(Solution* sol, int iterations) override;
