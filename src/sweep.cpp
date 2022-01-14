@@ -77,9 +77,43 @@ Point intersection_point(int i1, int i2) {
     long double x3 = e2.v1->x; long double y3 = e2.v1->y;
     long double x4 = e2.v2->x; long double y4 = e2.v2->y;
     long double D = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
-    long double x = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / D;
-    long double y = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / D;
-    return {x, y};
+    if (D) {
+        long double x = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / D;
+        long double y = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / D;
+        return {x, y};
+    } else {
+        // Check x coords
+        if (std::max(x1,x2) == std::max(x3,x4) && std::min(x1,x2) == std::min(x3,x4)) {
+            if (x1 <= std::max(x3,x4) && x1 >= std::min(x3,x4)) {
+                return {x1, y1};
+            }
+            if (x2 <= std::max(x3,x4) && x2 >= std::min(x3,x4)) {
+                return {x2, y2};
+            }
+            if (x3 <= std::max(x1,x2) && x3 >= std::min(x1,x2)) {
+                return {x3, y3};
+            }
+            if (x4 <= std::max(x1,x2) && x4 >= std::min(x1,x2)) {
+                return {x4, y4};
+            }
+        }
+
+        // Check y coords
+        if (std::max(y1,y2) == std::max(y3,y4) && std::min(y1,y2) == std::min(y3,y4)) {
+            if (y1 <= std::max(y3,y4) && y1 >= std::min(y3,y4)) {
+                return {x1, y1};
+            }
+            if (y2 <= std::max(y3,y4) && y2 >= std::min(y3,y4)) {
+                return {x2, y2};
+            }
+            if (y3 <= std::max(y1,y2) && y3 >= std::min(y1,y2)) {
+                return {x3, y3};
+            }
+            if (y4 <= std::max(y1,y2) && y4 >= std::min(y1,y2)) {
+                return {x4, y4};
+            }
+        }
+    }
 }
 
 static StatusIter getIterator(long double x, int edge) {
@@ -190,6 +224,7 @@ static void handleUpper(Event e) {
         if (DEBUG) cout << "Checking " << edge << " " << iter->second << endl;
         if (Edge::intersect(&S->at(edge), &S->at(iter->second))) {
             Point p = intersection_point(edge, iter->second);
+            if (DEBUG) cout << "INTERSECTION FOUND: " << edge << " " << iter->second << " at " << p.x << "," << p.y << endl;
             Q.emplace(p.x, p.y, edge, iter->second, INTERSECT);
         }
     }
@@ -199,6 +234,7 @@ static void handleUpper(Event e) {
         if (iter->second == edge) continue;
         if (DEBUG) cout << "Checking " << edge << " " << iter->second << endl;
         if (Edge::intersect(&S->at(edge), &S->at(iter->second))) {
+            if (DEBUG) cout << "INTERSECTION FOUND: " << edge << " " << iter->second << endl;
             Point p = intersection_point(edge, iter->second);
             Q.emplace(p.x, p.y, edge, iter->second, INTERSECT);
         }
