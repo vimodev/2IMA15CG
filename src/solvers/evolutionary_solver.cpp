@@ -124,7 +124,8 @@ Solution* EvolutionarySolver::solve(Instance instance) {
 
         cout << "[INFO] Offspring has " << offspring->get_clashes() << " clashes." << endl;
 
-        TabuSearcher().search(offspring, local_iters);
+        TabuSearcher().search(offspring, local_iters/2);
+        IterativeSearcher().search(offspring, local_iters/2);
         if (offspring->get_clashes() == 0) {
             return offspring;
         }
@@ -138,5 +139,5 @@ Solution* EvolutionarySolver::solve(Instance instance) {
     }
 
     std::cout << "\n[INFO] HEA could not find a solution with 0 clashes." << std::endl;
-    return nullptr;
+    return 0;
 }

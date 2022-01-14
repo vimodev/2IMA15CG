@@ -17,9 +17,10 @@ Solution *IterativeSearcher::search(Solution* sol, int iterations) {
     int new_color;
     int old_color;
     
-    int prev;
     int new_clashes;
     int old_clashes = sol->get_clashes();
+
+    int prev = old_clashes;
 
     for (int i = 0; i < iterations; i++) {
 
@@ -38,9 +39,8 @@ Solution *IterativeSearcher::search(Solution* sol, int iterations) {
         }
 
 
-        if (prev != old_clashes) {
-            cout << "[INFO] Iteration " << (i+1) << "/" << iterations << " of II." << endl;
-            cout << "[INFO] Current number of clashes: " << old_clashes << "." << endl;
+        if (prev > old_clashes) {
+            cout << "[INFO] Iteration " << (i+1) << "/" << iterations << " of II found a solution with only " << old_clashes << " clashes." << endl;
         }
         prev = old_clashes;
 

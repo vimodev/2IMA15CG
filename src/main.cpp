@@ -62,7 +62,15 @@ int main(int argc, char **argv) {
         case '3': { 
             cout << "[INFO] Running evolutionary solver." << endl;
             Solution *bound_sol = DSaturSolver().solve(inst);
-            sol = EvolutionarySolver(bound_sol->num_colors-1).solve(inst);
+            int bound = bound_sol->num_colors;
+            for (int i = bound-1; i > 0; i--) {
+                cout << "\n[INFO] Trying to find solution for " << i << " colors.\n" << endl;
+                sol = EvolutionarySolver(i).solve(inst);
+                if (!sol || !sol->check_validity()) break;
+                cout << "\n[INFO] Found solution for " << i << " colors.\n" << endl;
+                sol->to_file("../solutions/", true, "");
+            }
+            
             break;
         }
         case '2': {

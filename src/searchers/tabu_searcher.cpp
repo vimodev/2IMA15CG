@@ -32,7 +32,7 @@ Solution *TabuSearcher::search(Solution* sol, int iterations) {
 
     int cur_c = sol->get_clashes();
     vector<tuple<int,int>> *bests;
-    int prev;
+    int prev = cur_c;
     int best;
     int best_c;
     int best_i;
@@ -77,9 +77,8 @@ Solution *TabuSearcher::search(Solution* sol, int iterations) {
         
         T[best_i][best_j] = iteration + cur_c*cur_c;
         
-        if (prev != cur_c) {
-            cout << "[INFO] Iteration " << (iteration+1) << "/" << iterations << " of TabuCol." << endl;
-            cout << "[INFO] Current number of clashes: " << cur_c << "." << endl;
+        if (prev > cur_c) {
+            cout << "[INFO] Iteration " << (iteration+1) << "/" << iterations << " of TabuCol found a solution with only " << cur_c << " clashes." << endl;
         }
         prev = cur_c;
 
