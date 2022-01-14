@@ -55,7 +55,28 @@ int main(int argc, char **argv) {
     Instance inst(argv[1]);
     cout << inst.id << " has " << inst.vertices->size() << " vertices and " << inst.edges->size() << " edges." << endl;
     Cache::set_instance(&inst);
-    Solution *sol = GreedySolver().solve(inst);
+    Solution *sol;
+
+    switch (*argv[2]) {
+        case '3': { 
+            cout << "Running evolutionary solver..." << endl;
+            Solution *bound_sol = DSaturSolver().solve(inst);
+            sol = EvolutionarySolver(bound_sol->num_colors-1).solve(inst);
+            break;
+        }
+        case '2': {
+            cout << "Running DSatur solver..." << endl;
+            sol = DSaturSolver().solve(inst);
+            break;
+        }
+        case '1': 
+        default: {
+            cout << "Running greedy solver..." << endl;
+            sol = GreedySolver().solve(inst);
+            break;
+        }
+    }
+    
 
     cout << "Solution found. Colors used: " << sol->num_colors << endl;
     cout << "Checking validity..." << endl;
