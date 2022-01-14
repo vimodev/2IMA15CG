@@ -18,7 +18,7 @@ Solution* EvolutionarySolver::solve(Instance instance) {
     }
 
     for (int i = 0; i < this->iters; i++) {
-        std::cout << "\n[INFO] Iteration " << (i+1) << "/" << this->iters << " of HEA." << std::endl;
+        std::cout << "\n[INFO] Iteration " << (i+1) << "/" << this->iters << " of HEA (instance=" << instance.id << ", colors=" << this->N << ")." << std::endl;
 
         int parent1_i = distr(gen);
         Solution *parent1 = population->at(parent1_i);
@@ -135,6 +135,24 @@ Solution* EvolutionarySolver::solve(Instance instance) {
             
         } else {
             population->at(parent2_i) = offspring;
+        }
+
+        if ((i+1) % 10 == 0) {
+            cout << "\n[INFO] Adding fresh meat to the cesspool. " << endl;
+            int most_clashes = population->at(0)->get_clashes();
+            int most_clashes_i = 0;
+            int cur_clashes;
+            for (int i = 1; i < this->pop_size; i++) {
+                cur_clashes = population->at(i)->get_clashes();
+                if (cur_clashes > most_clashes) {
+                    most_clashes = cur_clashes;
+                    most_clashes_i = i;
+                }
+            }
+            Solution *new_sol = DSaturSolver(this->N).solve(instance);
+            
+            cout << "[INFO] New solution added to population with " << new_sol->get_clashes() << " clashes, replaces solution #" << most_clashes_i << " with " << population->at(most_clashes_i)->get_clashes() << " clashes." << endl;
+            population->at(most_clashes_i) = new_sol;
         }
     }
 
