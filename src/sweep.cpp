@@ -2,9 +2,14 @@
 
 #include <queue>
 #include <map>
+#include <set>
 #include <algorithm>
+#include <cmath>
+#include <limits>
 
 #include "cache.h"
+
+#define DEBUG false
 
 typedef std::multimap<long double, int>::iterator StatusIter;
 
@@ -24,31 +29,33 @@ Event::Event(long double x, long double y, int e1, int e2, EventType type) {
 
 static vector<Edge> *S;
 static vector<long double> keys;
+static multimap<long double, int> T;
+static priority_queue<Event> Q;
 
-static void insert_endpoints(priority_queue<Event> *Q) {
+static void insert_endpoints() {
     for (int i = 0; i < S->size(); i++) {
         Vertex *v1 = S->at(i).v1;
         Vertex *v2 = S->at(i).v2;
         // v1 is upper endpoint
         if (v1->y > v2->y) {
-            Q->emplace((long double) 1.0 * v1->x, (long double) 1.0 * v1->y, i, -1, UPPER);
+            Q.emplace((long double) 1.0 * v1->x, (long double) 1.0 * v1->y, i, -1, UPPER);
             // keys[i] = {(long double) 1.0 * v1->x, (long double) v1->y};
-            Q->emplace((long double) 1.0 * v2->x, (long double) 1.0 * v2->y, i, -1, LOWER);
+            Q.emplace((long double) 1.0 * v2->x, (long double) 1.0 * v2->y, i, -1, LOWER);
         // v2 is upper endpoint
         } else if (v1->y < v2->y) {
-            Q->emplace((long double) 1.0 * v2->x, (long double) 1.0 * v2->y, i, -1, UPPER);
+            Q.emplace((long double) 1.0 * v2->x, (long double) 1.0 * v2->y, i, -1, UPPER);
             // keys[i] = {(long double) 1.0 * v2->x, (long double) v2->y};
-            Q->emplace((long double) 1.0 * v1->x, (long double) 1.0 * v1->y, i, -1, LOWER);
+            Q.emplace((long double) 1.0 * v1->x, (long double) 1.0 * v1->y, i, -1, LOWER);
         // Left endpoint is upper on equality
         } else if (v1->y == v2->y) {
             if (v1->x < v2->x) {
-                Q->emplace((long double) 1.0 * v1->x, (long double) 1.0 * v1->y, i, -1, UPPER);
+                Q.emplace((long double) 1.0 * v1->x, (long double) 1.0 * v1->y, i, -1, UPPER);
                 // keys[i] = {(long double) 1.0 * v1->x, (long double) v1->y};
-                Q->emplace((long double) 1.0 * v2->x, (long double) 1.0 * v2->y, i, -1, LOWER);
+                Q.emplace((long double) 1.0 * v2->x, (long double) 1.0 * v2->y, i, -1, LOWER);
             } else {
-                Q->emplace((long double) 1.0 * v2->x, (long double) 1.0 * v2->y, i, -1, UPPER);
+                Q.emplace((long double) 1.0 * v2->x, (long double) 1.0 * v2->y, i, -1, UPPER);
                 // keys[i] = {(long double) 1.0 * v2->x, (long double) v2->y};
-                Q->emplace((long double) 1.0 * v1->x, (long double) 1.0 * v1->y, i, -1, LOWER);
+                Q.emplace((long double) 1.0 * v1->x, (long double) 1.0 * v1->y, i, -1, LOWER);
             }
         }
     }
@@ -63,14 +70,6 @@ static Point getUpper(Edge e) {
     return {(long double)v2->x, (long double)v2->y};
 }
 
-// Was p1 handled before p2?
-static bool before(Point p1, Point p2) {
-    if (p1.y > p2.y) return true;
-    if (p1.y < p2.y) return false;
-    if (p1.x < p2.x) return true;
-    return false;
-}
-
 Point intersection_point(int i1, int i2) {
     auto e1 = S->at(i1); auto e2 = S->at(i2);
     long double x1 = e1.v1->x; long double y1 = e1.v1->y;
@@ -83,177 +82,205 @@ Point intersection_point(int i1, int i2) {
     return {x, y};
 }
 
-static StatusIter getIterator(multimap<long double, int> *T, long double x, int edge) {
-    auto range = T->equal_range(x);
+static StatusIter getIterator(long double x, int edge) {
+    auto range = T.equal_range(x);
     for (auto iter = range.first; iter != range.second; ++iter) {
         if (iter->second == edge) {
             return iter;
         }
     }
-    return T->end();
+    return T.end();
 }
 
-static pair<StatusIter, StatusIter> getLeft(multimap<long double, int> *T, StatusIter iter) {
-    auto left = T->lower_bound(iter->first);
-    if (left == T->begin()) return {T->end(), T->end()};
-    return T->equal_range(prev(left)->first);
+// Get everything to the left of the iterator, including equal values
+static pair<StatusIter, StatusIter> getLeft(StatusIter iter) {
+    // Range of values equal to iterator
+    auto equal = T.equal_range(iter->first);
+    // We add the rightmost of those as the right limit
+    auto right = equal.second;
+    // Left limit is the leftmost of those
+    auto left = equal.first;
+    // But if there are more to the left
+    if (equal.first != T.begin()) {
+        // Add 1 step more
+        left = T.lower_bound(prev(equal.first)->first);
+    }
+    return {left, right};
 }
 
-static pair<StatusIter, StatusIter> getRight(multimap<long double, int> *T, StatusIter iter) {
-    auto right = T->upper_bound(iter->first);
-    if (right == T->end()) return {T->end(), T->end()};
-    return T->equal_range(right->first);
+// Get everything directly right of iterator
+static pair<StatusIter, StatusIter> getRight(StatusIter iter) {
+    // Equal values
+    auto equal = T.equal_range(iter->first);
+    // Set bounds
+    auto left = equal.first;
+    auto right = equal.second;
+    // If there is place to the right
+    if (right != T.end()) {
+        // Get the direct right element
+        // So get upper bound, and all values equal to that, and then get the right most
+        right = T.equal_range(right->first).second;
+    }
+    return {left, right};
+}
+
+static pair<StatusIter, StatusIter> getArea(long double x) {
+    auto equal = T.equal_range(x);
+    if (equal.first == T.end()) return {T.end(), T.end()};
+    // There were equal values
+    if (equal.first->first == x) {
+        auto range = equal;
+        // If there is something to the left
+        if (equal.first != T.begin()) {
+            range.first = T.lower_bound(prev(equal.first)->first);
+        }
+        // If there is something to the right
+        if (equal.second != T.end()) {
+            range.second = T.upper_bound(equal.second->first);
+        }
+        return range;
+    // There were no equal values
+    } else {
+        auto range = equal;
+        // If there is something to the left
+        if (equal.first != T.begin()) {
+            range.first = T.lower_bound(prev(equal.first)->first);
+        }
+        // If there is something to the right
+        if (equal.second != T.end()) {
+            range.second = T.upper_bound(equal.second->first);
+        }
+        return range;
+    }
 }
 
 static long double getKey(int edge) {
     return keys[edge];
-    // Vertex *v1 = edge->v1;
-    // Vertex *v2 = edge->v2;
-    // if (v1->y > v2->y) return (long double) 1.0 * v1->x;
-    // if (v1->y < v2->y) return (long double) 1.0 * v2->x;
-    // if (v1->x < v2->x) return (long double) 1.0 * v1->x;
-    // return (long double) 1.0 * v2->x;
 }
 
-static void handle_event(Event e, priority_queue<Event> *Q, multimap<long double, int> *T) {
-    if (e.type == UPPER) {
-        // cout << "Handling upper endpoint (" << e.p.x << "," << e.p.y << ") of edge " << e.e1 << endl;
-        Edge *edge = &S->at(e.e1);
-        // Insert the segment s at point p
-        T->insert({e.p.x, e.e1});
-        keys[e.e1] = e.p.x;
-        // Get its location
-        auto location = getIterator(T, e.p.x, e.e1);
-        // Check left for collision
-        auto left_range = getLeft(T, location);
-        // Go over all equal neighbours
-        for (auto iter = left_range.first; iter != left_range.second; iter++) {
-            Edge *other = &S->at(iter->second);
-            // If other is above or left<= the intersection will have been noted already
-            // if (before(getUpper(*other), getUpper(*edge))) continue;
-            // If they intersect
-            if (Edge::intersect(edge, other)) {
-                // Add the event
-                Point intersection = intersection_point(e.e1, iter->second);
-                Q->emplace(intersection.x, intersection.y, iter->second, e.e1, INTERSECT);
-                // cout << iter->second << " " << e.e1 << " added to queue" << endl;
-            }
-        }
-        // Check right for collision
-        auto right_range = getRight(T, location);
-        // Go over all neighbours >
-        for (auto iter = right_range.first; iter != right_range.second; iter++) {
-            Edge *other = &S->at(iter->second);
-            // if (before(getUpper(*other), getUpper(*edge))) continue;
-            // If they intersect
-            if (Edge::intersect(edge, other)) {
-                // Add the event
-                Point intersection = intersection_point(e.e1, iter->second);
-                Q->emplace(intersection.x, intersection.y, e.e1, iter->second, INTERSECT);
-                // cout << e.e1 << " " << iter->second << " added to queue" << endl;
-            }
-        }
-    } else if (e.type == LOWER) {
-        // cout << "Handling lower endpoint (" << e.p.x << "," << e.p.y << ") of edge " << e.e1 << endl;
-        Edge *edge = &S->at(e.e1);
-        // Find the x of the other endpoint
-        long double key = getKey(e.e1);
-        // Get its location
-        auto location = getIterator(T, key, e.e1);
-        // Get left and right neighbours
-        auto left_range = getLeft(T, location);
-        auto right_range = getRight(T, location);
-        // Check for pairwise intersection
-        for (auto left = left_range.first; left != left_range.second; left++) {
-            for (auto right = right_range.first; right != right_range.second; right++) {
-                // If they intersect
-                if (Edge::intersect(&S->at(left->second), &S->at(right->second))) {
-                    // Calculate the point and check if its below sweepline
-                    Point intersection = intersection_point(left->second, right->second);
-                    if (intersection.y < e.p.y) {
-                        // If its below sweepline add it
-                        Q->emplace(intersection.x, intersection.y, left->second, right->second, INTERSECT);
-                        // cout << left->second << " " << right->second << " added to queue" << endl;
-                    }
-                }
-            }
-        }
-    } else if (e.type == INTERSECT) {
-        if (Cache::intersects(e.e1, e.e2)) return;
-        // Get left info
-        long double left_key = getKey(e.e1);
-        auto left_loc = getIterator(T, left_key, e.e1);
-        int left_edge = left_loc->second;
-        T->erase(left_loc);
-        // Get right info
-        long double right_key = getKey(e.e2);
-        auto right_loc = getIterator(T, right_key, e.e2);
-        int right_edge = right_loc->second;
-        T->erase(right_loc);
-        // Swap
-        T->insert({left_key, right_edge});
-        keys[right_edge] = left_key;
-        T->insert({right_key, left_edge});
-        keys[left_edge] = right_key;
-        // Check if left now intersects
-        left_loc = getIterator(T, left_key, right_edge);
-        auto left_range = getLeft(T, left_loc);
-        // Go over all equal neighbours
-        for (auto iter = left_range.first; iter != left_range.second; iter++) {
-            Edge *other = &S->at(iter->second);
-            // If they intersect
-            if (Edge::intersect(&S->at(right_edge), other)) {
-                // Add the event if they intersect below
-                Point intersection = intersection_point(right_edge, iter->second);
-                if (intersection.y < e.p.y) {
-                    Q->emplace(intersection.x, intersection.y, iter->second, right_edge, INTERSECT);
-                    // cout << iter->second << " " << right_edge << " added to queue" << endl;
-                }
-            }
-        }
-        // Check if right now intersects
-        right_loc = getIterator(T, right_key, left_edge);
-        auto right_range = getRight(T, right_loc);
-        // Go over all equal neighbours
-        for (auto iter = right_range.first; iter != right_range.second; iter++) {
-            Edge *other = &S->at(iter->second);
-            // If they intersect
-            if (Edge::intersect(&S->at(left_edge), other)) {
-                // Add the event if they intersect below
-                Point intersection = intersection_point(left_edge, iter->second);
-                if (intersection.y < e.p.y) {
-                    Q->emplace(intersection.x, intersection.y, left_edge, iter->second, INTERSECT);
-                    // cout << left_edge << " " << iter->second << " added to queue" << endl;
-                }
-            }
-        }
-        int i;
-        int j;
-        if (left_edge <= right_edge) {
-            i = left_edge;
-            j = right_edge;
-        } else {
-            i = right_edge;
-            j = left_edge;
-        }
-        // cout << i << " " << j << " intersect at (" << e.p.x << "," << e.p.y << ")" << endl;
-        Cache::cache[i][j] = true;
-        Cache::counts[i]++;
-        Cache::counts[j]++;
-    }
+static StatusIter addStatus(long double key, int edge) {
+    keys[edge] = key;
+    return T.insert({key, edge});
+}
 
+void printStatus() {
+    cout << "STATUS: ";
+    for (auto p : T) {
+        cout << "(" << p.first << "," << p.second << ") ";
+    }
+    cout << endl;
+}
+
+string toString(EventType t) {
+    if (t == UPPER) return "upper";
+    if (t == LOWER) return "lower";
+    return "intersect";
+}
+
+// Handle an upper endpoint event
+static void handleUpper(Event e) {
+    long double x = e.p.x;
+    int edge = e.e1;
+    if (DEBUG) cout << "Adding (" << x << "," << edge << ")" << endl;
+    auto location = addStatus(x, edge);
+    // Check left for intersection
+    auto left_range = getLeft(location);
+    for (auto iter = left_range.first; iter != left_range.second; iter++) {
+        if (iter->second == edge) continue;
+        if (DEBUG) cout << "Checking " << edge << " " << iter->second << endl;
+        if (Edge::intersect(&S->at(edge), &S->at(iter->second))) {
+            Point p = intersection_point(edge, iter->second);
+            Q.emplace(p.x, p.y, edge, iter->second, INTERSECT);
+        }
+    }
+    // Check right for itnersection
+    auto right_range = getRight(location);
+    for (auto iter = right_range.first; iter != right_range.second; iter++) {
+        if (iter->second == edge) continue;
+        if (DEBUG) cout << "Checking " << edge << " " << iter->second << endl;
+        if (Edge::intersect(&S->at(edge), &S->at(iter->second))) {
+            Point p = intersection_point(edge, iter->second);
+            Q.emplace(p.x, p.y, edge, iter->second, INTERSECT);
+        }
+    }
+}
+
+// Handle a lower endpoint event
+static void handleLower(Event e) {
+    int edge = e.e1;
+    long double x = keys[edge];
+    if (DEBUG) cout << "Removing (" << x << "," << edge << ")" << endl;
+    // Remove the edge from status
+    T.erase(getIterator(x, edge));
+    // Get the direct area
+    auto range = getArea(x);
+    // if (DEBUG) cout << range.first->second << " " << prev(range.second)->second << endl;
+    // Loop over the entire area to check for pairwise intersection
+    for (auto i1 = range.first; i1 != range.second; i1++) {
+        for (auto i2 = range.first; i2 != range.second; i2++) {
+            if (i1->first == i2->first) continue;
+            if (Edge::intersect(&S->at(i1->second), &S->at(i2->second))) {
+                Point p = intersection_point(i1->second, i2->second);
+                if (p.y <= e.p.y && !Cache::intersects(i1->second, i2->second)) {
+                    Q.emplace(p.x, p.y, i1->second, i2->second, INTERSECT);
+                }
+            }
+        }
+    }
+}
+
+static void handleIntersect(Event e) {
+    if (Cache::intersects(e.e1, e.e2)) return;
+    // Make sure e1 is left and e2 is right
+    if (keys[e.e1] > keys[e.e2]) {
+        auto temp = e.e1;
+        e.e1 = e.e2;
+        e.e2 = temp;
+    }
+    if (DEBUG) cout << "INTERSECTION: " << e.e1 << " " << e.e2 << endl;
+    if (DEBUG) cout << "Swapping (" << keys[e.e1] << "," << e.e1 << ") and (" << keys[e.e2] << "," << e.e2 << ")" << endl;
+    Cache::setIntersect(e.e1, e.e2);
+    // Swap the elements
+    auto left = getIterator(keys[e.e1], e.e1);
+    auto right = getIterator(keys[e.e2], e.e2);
+    left->second = e.e2;
+    keys[e.e2] = left->first;
+    right->second = e.e1;
+    keys[e.e1] = right->first;
+    // Check for intersections in the area again
+    auto left_range = getArea(left->first);
+    for (auto iter = left_range.first; iter != left_range.second; iter++) {
+        if (iter->second == left->second) continue;
+        if (Edge::intersect(&S->at(left->second), &S->at(iter->second))) {
+            Point p = intersection_point(left->second, iter->second);
+            if (p.y <= e.p.y && !Cache::intersects(left->second, iter->second)) {
+                Q.emplace(p.x, p.y, left->second, iter->second, INTERSECT);
+            }
+        }
+    }
+    auto right_range = getArea(right->first);
+    for (auto iter = right_range.first; iter != right_range.second; iter++) {
+        if (iter->second == right->second) continue;
+        if (Edge::intersect(&S->at(right->second), &S->at(iter->second))) {
+            Point p = intersection_point(right->second, iter->second);
+            if (p.y <= e.p.y && !Cache::intersects(right->second, iter->second)) {
+                Q.emplace(p.x, p.y, right->second, iter->second, INTERSECT);
+            }
+        }
+    }
 }
 
 void Sweepline::sweep(vector<Edge> *set) {
     S = set;
     keys.clear();
     keys.resize(set->size());
-    priority_queue<Event> Q;
-    multimap<long double, int> T;
-    insert_endpoints(&Q);
+    insert_endpoints();
     while (!Q.empty()) {
+        if (DEBUG) printStatus();
         Event e = Q.top();
+        if (e.type == UPPER) handleUpper(e);
+        if (e.type == LOWER) handleLower(e);
+        if (e.type == INTERSECT) handleIntersect(e);
         Q.pop();
-        handle_event(e, &Q, &T);
     }
 }

@@ -1,0 +1,15 @@
+{
+    "colors": [
+        0,
+        0,
+        0,
+        1,
+        1,
+        2,
+        0,
+        3
+    ],
+    "instance": "test",
+    "num_colors": 4,
+    "type": "Solution_CGSHOP2022"
+}

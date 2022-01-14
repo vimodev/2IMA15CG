@@ -1,5 +1,11 @@
 #include "instance.h"
 
+#define edge_limit 100
+
+std::ostream &operator<<(std::ostream &os, Vertex const &v) { 
+            return os << "(" << v.x << "," << v.y << ")";
+        }
+
 // Create a problem instance from a parsed json
 // Vincent Moonen
 Instance::Instance(const string& filepath) {
@@ -13,6 +19,7 @@ Instance::Instance(const string& filepath) {
     this->id = j["id"];
     this->n = j["n"];
     this->m = j["m"];
+    this->m = min(this->m, edge_limit);
     // Populate vertices
     this->vertices = new vector<Vertex>;
     for (int i = 0; i < this->n; i++) {
@@ -21,11 +28,12 @@ Instance::Instance(const string& filepath) {
     }
     // Populate edges
     this->edges = new vector<Edge>;
-    for (int i = 0; i < this->m; i++) {
+    for (int i = 0; i < min((int) j["m"], edge_limit); i++) {
         int v1i = j["edge_i"][i];
         int v2i = j["edge_j"][i];
         Edge e(&this->vertices->at(v1i), &this->vertices->at(v2i));
         this->edges->push_back(e);
+        cout << v1i << " " << v2i << " : " << this->vertices->at(v1i) << " - " << this->vertices->at(v2i) << endl;
     }
     assert((long unsigned int) this->n == this->vertices->size());
     assert((long unsigned int) this->m == this->edges->size());

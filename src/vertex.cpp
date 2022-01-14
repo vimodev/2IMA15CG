@@ -10,7 +10,3 @@ Vertex::Vertex(int x, int y) {
 bool Vertex::equal(Vertex *v1, Vertex *v2) {
     return (v1->x == v2->x && v1->y == v2->y);
 }
-
-std::ostream &operator<<(std::ostream &os, Vertex const &v) { 
-    return os << "(" << v.x << "," << v.y << ")";
-}
