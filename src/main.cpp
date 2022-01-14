@@ -53,41 +53,41 @@ int main(int argc, char **argv) {
 
     // Reading instance from json wokrs
     Instance inst(argv[1]);
-    cout << inst.id << " has " << inst.vertices->size() << " vertices and " << inst.edges->size() << " edges." << endl;
+    cout << "[INFO] " << inst.id << " has " << inst.vertices->size() << " vertices." << endl;
+    cout << "[INFO] " << inst.id << " has " << inst.edges->size() << " edges." << endl;
     Cache::set_instance(&inst);
     Solution *sol;
 
     switch (*argv[2]) {
         case '3': { 
-            cout << "Running evolutionary solver..." << endl;
+            cout << "[INFO] Running evolutionary solver." << endl;
             Solution *bound_sol = DSaturSolver().solve(inst);
             sol = EvolutionarySolver(bound_sol->num_colors-1).solve(inst);
             break;
         }
         case '2': {
-            cout << "Running DSatur solver..." << endl;
+            cout << "[INFO] Running DSatur solver." << endl;
             sol = DSaturSolver().solve(inst);
             break;
         }
         case '1': 
         default: {
-            cout << "Running greedy solver..." << endl;
+            cout << "[INFO] Running greedy solver." << endl;
             sol = GreedySolver().solve(inst);
             break;
         }
     }
-    
 
-    cout << "Solution found. Colors used: " << sol->num_colors << endl;
-    cout << "Checking validity..." << endl;
+    cout << "[INFO] Solution found." << endl;
 
-    if(sol->check_validity()) {
-        cout << "Solution valid!" << endl;
-    } else {
-        cout << "Solution invalid!" << endl;
-    }
+    cout << "\n  -- SOLUTION  SUMMARY --  " << endl;
+    cout << "        Colors : " << sol->num_colors << endl;
+    cout << "        Valid? : " << (sol->check_validity() ? "YES" : "NO") << endl;
+    cout << "  - - - - - - - - - - - -  \n" << endl;
 
+    cout << "[INFO] Writing solution to file." << endl;
     sol->to_file("../solutions/", true, "");
 
+    cout << "\nDONE..." << endl;
     return 0;
 }

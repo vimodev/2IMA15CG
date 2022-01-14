@@ -14,17 +14,17 @@ Solution* EvolutionarySolver::solve(Instance instance) {
     for (int i = 0; i < this->pop_size; i++) {
         Solution *sol = DSaturSolver(this->N).solve(instance);
         population->push_back(sol);
-        std::cout << "Added solution " << i << " to population with " << sol->get_clashes() << " clashes..." << std::endl;
+        std::cout << "[INFO] Solution #" << i << " added to population with " << sol->get_clashes() << " clashes." << std::endl;
     }
 
-    for (int i = 0; i < 100; i++) {
-        std::cout << "Iteration " << i << " of HEA..." << std::endl;
+    for (int i = 0; i < this->iters; i++) {
+        std::cout << "\n[INFO] Iteration " << (i+1) << "/" << this->iters << " of HEA." << std::endl;
 
         int parent1_i = distr(gen);
         Solution *parent1 = population->at(parent1_i);
         int parent2_i = distr(gen);
         Solution *parent2 = population->at(parent2_i);
-        std::cout << "Parent " << parent1_i << " and parent " << parent2_i << " randomly chosen..." << std::endl; 
+        std::cout << "[INFO] Solution #" << parent1_i << " (clashes=" << parent1->get_clashes() << ") and solution #" << parent2_i << " (clashes=" << parent2->get_clashes() << ") randomly chosen to do the rumpy-pumpy." << std::endl; 
 
         Solution *offspring = new Solution(&instance);
         offspring->initialize(this->N);
@@ -122,7 +122,9 @@ Solution* EvolutionarySolver::solve(Instance instance) {
             largest->at(largest_color_class) = {};
         }
 
-        IterativeSearcher().search(offspring, local_iters);
+        cout << "[INFO] Offspring has " << offspring->get_clashes() << " clashes." << endl;
+
+        TabuSearcher().search(offspring, local_iters);
         if (offspring->get_clashes() == 0) {
             return offspring;
         }
@@ -135,6 +137,6 @@ Solution* EvolutionarySolver::solve(Instance instance) {
         }
     }
 
-    std::cout << "Could not find a solution with no clashes..." << std::endl;
+    std::cout << "\n[INFO] HEA could not find a solution with 0 clashes." << std::endl;
     return nullptr;
 }

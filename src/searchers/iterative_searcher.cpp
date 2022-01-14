@@ -12,16 +12,24 @@ Solution *IterativeSearcher::search(Solution* sol, int iterations) {
     uniform_int_distribution<> distr_n(0, n-1); // define the range
     uniform_int_distribution<> distr_k(0, k-1); // define the range
 
+    int index;
+
+    int new_color;
+    int old_color;
+    
+    int prev;
+    int new_clashes;
+    int old_clashes = sol->get_clashes();
+
     for (int i = 0; i < iterations; i++) {
 
-        int index = distr_n(gen);        
-        int new_color = distr_k(gen);
+        index = distr_n(gen);        
+        new_color = distr_k(gen);
 
-        int old_clashes = sol->get_clashes();
-        int old_color = sol->colors->at(index);
+        old_color = sol->colors->at(index);
 
         sol->colors->at(index) = new_color;
-        int new_clashes = sol->get_clashes();
+        new_clashes = sol->get_clashes();
 
         if (old_clashes < new_clashes) {
             sol->colors->at(index) = old_color;
@@ -29,10 +37,13 @@ Solution *IterativeSearcher::search(Solution* sol, int iterations) {
             old_clashes = new_clashes;
         }
 
-        if (i % 100 == 0) {
-            cout << "Iteration: " << i << " for num_colors: " << k << endl;
-            cout << "NR OF CLASHES: " << new_clashes << endl << endl;
+
+        if (prev != old_clashes) {
+            cout << "[INFO] Iteration " << (i+1) << "/" << iterations << " of II." << endl;
+            cout << "[INFO] Current number of clashes: " << old_clashes << "." << endl;
         }
+        prev = old_clashes;
+
         if (new_clashes == 0) break;
     }
 

@@ -71,8 +71,9 @@ public:
 
 class EvolutionarySolver : public AbstractSolver {
 public:
-    EvolutionarySolver(int N, int pop_size = 10, int local_iters = 100) : AbstractSolver() {
+    EvolutionarySolver(int N, int pop_size = 10, int iters = 50, int local_iters = 500) : AbstractSolver() {
         this->pop_size = pop_size;
+        this->iters = iters;
         this->local_iters = local_iters;
         this->N = N;
     }
@@ -82,6 +83,7 @@ public:
     };
 
     int pop_size;
+    int iters;
     int local_iters;
     int N;
     Solution *solve(Instance instance) override;
