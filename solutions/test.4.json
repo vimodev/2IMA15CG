@@ -6,9 +6,10 @@
         1,
         1,
         2,
-        0
+        0,
+        3
     ],
-    "instance": "tiny7",
-    "num_colors": 3,
+    "instance": "test",
+    "num_colors": 4,
     "type": "Solution_CGSHOP2022"
 }

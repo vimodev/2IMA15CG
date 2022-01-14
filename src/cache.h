@@ -19,5 +19,6 @@ class Cache {
         static vector<int> *adjacency_list[MAX_EDGES];
         static bitset<MAX_EDGES> cache[MAX_EDGES];
         static int counts[MAX_EDGES];
+        static void setIntersect(int i, int j);
         
 };

@@ -25,9 +25,10 @@ void Cache::set_instance(Instance *pInstance) {
     Sweepline::sweep(edges);
     int sum = 0;
     for (int i = 0; i < pInstance->m; i++) {
-        sum += counts[i];
+        for (int j = i + 1; j < pInstance->m; j++) {
+            if (cache[i][j]) sum++;
+        }
     }
-    sum /= 2;
     cout << sum << endl;
 
     #pragma omp parallel for schedule(dynamic)
@@ -39,6 +40,7 @@ void Cache::set_instance(Instance *pInstance) {
             }
             if (cache[i][j]) continue;
             if (intersect) {
+                // cout << i << " " << j << endl;
                 counts[i] += 1;
                 counts[j] += 1;
             }
@@ -48,9 +50,10 @@ void Cache::set_instance(Instance *pInstance) {
     
     sum = 0;
     for (int i = 0; i < pInstance->m; i++) {
-        sum += counts[i];
+        for (int j = i + 1; j < pInstance->m; j++) {
+            if (cache[i][j]) sum++;
+        }
     }
-    sum /= 2;
     cout << sum << endl;
 
     cout << "Intersection cache filled." << endl;
@@ -67,6 +70,12 @@ void Cache::set_instance(Instance *pInstance) {
 
     Cache::initialized = true;
     cout << "Adjacency cache filled." << endl;
+}
+void Cache::setIntersect(int i, int j) {
+    if (i > j) setIntersect(j, i);
+    cache[i][j] = true;
+    counts[i]++;
+    counts[j]++;
 }
 
 bool Cache::intersects(int i, int j) {

@@ -5,10 +5,14 @@
         0,
         1,
         1,
+        1,
+        1,
+        0,
+        1,
         2,
-        0
+        2
     ],
-    "instance": "tiny7",
+    "instance": "reecn3988",
     "num_colors": 3,
     "type": "Solution_CGSHOP2022"
 }
