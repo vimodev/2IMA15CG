@@ -31,6 +31,17 @@ static vector<Edge> *S;
 static vector<long double> keys;
 static multimap<long double, int> T;
 static priority_queue<Event> Q;
+bitset<MAX_EDGES> queued[MAX_EDGES];
+
+void setQueued(int i, int j) {
+    if (i > j) setQueued(j, i);
+    queued[i][j] = true;
+}
+
+bool getQueued(int i, int j) {
+    if (i > j) return getQueued(j, i);
+    return queued[i][j];
+}
 
 static void insert_endpoints() {
     for (int i = 0; i < S->size(); i++) {
@@ -193,17 +204,19 @@ void handleUpper(Event e) {
     auto range = getLeftRange(loc);
     for (auto other = range.first; other != range.second; other++) {
         if (loc->second == other->second) continue;
-        if (!Cache::intersects(loc->second, other->second) && Edge::intersect(&S->at(loc->second), &S->at(other->second))) {
+        if (!getQueued(loc->second, other->second) && Edge::intersect(&S->at(loc->second), &S->at(other->second))) {
             Point p = intersection_point(loc->second, other->second);
             Q.emplace(p.x, p.y, loc->second, other->second, INTERSECTION);
+            setQueued(loc->second, other->second);
         }
     }
     range = getRightRange(loc);
     for (auto other = range.first; other != range.second; other++) {
         if (loc->second == other->second) continue;
-        if (!Cache::intersects(loc->second, other->second) && Edge::intersect(&S->at(loc->second), &S->at(other->second))) {
+        if (!getQueued(loc->second, other->second) && Edge::intersect(&S->at(loc->second), &S->at(other->second))) {
             Point p = intersection_point(loc->second, other->second);
             Q.emplace(p.x, p.y, loc->second, other->second, INTERSECTION);
+            setQueued(loc->second, other->second);
         }
     }
 }
@@ -218,10 +231,11 @@ void handleLower(Event e) {
     for (auto l = left.first; l != left.second; l++) {
         for (auto r = right.first; r != right.second; r++) {
             if (l->second == r->second) continue;
-            if (!Cache::intersects(l->second, r->second) && Edge::intersect(&S->at(l->second), &S->at(r->second))) {
+            if (!getQueued(l->second, r->second) && Edge::intersect(&S->at(l->second), &S->at(r->second))) {
                 Point p = intersection_point(l->second, r->second);
                 if (p.y <= e.p.y) {
                     Q.emplace(p.x, p.y, l->second, r->second, INTERSECTION);
+                    setQueued(l->second, r->second);
                 }
             }
         }
@@ -254,10 +268,11 @@ void handleIntersection(Event e) {
     for (auto i1 = left.first; i1 != right.second; i1++) {
         for (auto i2 = left.first; i2 != right.second; i2++) {
             if (i1->second == i2->second) continue;
-            if (!Cache::intersects(i1->second, i2->second) && Edge::intersect(&S->at(i1->second), &S->at(i2->second))) {
+            if (!getQueued(i1->second, i2->second) && Edge::intersect(&S->at(i1->second), &S->at(i2->second))) {
                 Point p = intersection_point(i1->second, i2->second);
                 if (p.y <= e.p.y) {
                     Q.emplace(p.x, p.y, i1->second, i2->second, INTERSECTION);
+                    setQueued(i1->second, i2->second);
                 }
             }
         }
