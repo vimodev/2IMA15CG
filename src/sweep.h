@@ -1,6 +1,4 @@
 #include "instance.h"
-#include <vector>
-#include <string>
 
 using namespace std;
 
@@ -12,34 +10,19 @@ class Sweepline {
 class Point {
     public:
      Point(long double x, long double y);
+     Point(long double x, long double y, int id);
      Point();
      long double x;
      long double y;
+     int id;
 };
 
-enum EventType {
-    UPPER,
-    LOWER,
-    INTERSECT
-};
-
-class Event {
+class Segment {
     public:
-        Event(long double x, long double y, int e1, int e2, EventType type);
-        friend bool operator<(Event const& lhs, Event const& rhs) {
-            if (lhs.p.y == rhs.p.y) {
-                if (lhs.type == UPPER && rhs.type == LOWER) return false;
-                if (lhs.type == INTERSECT && rhs.type == LOWER) return false;
-                if (lhs.type == LOWER && rhs.type == UPPER) return true;
-                if (lhs.type == INTERSECT && rhs.type == UPPER) return true;
-                if (lhs.type == UPPER && rhs.type == INTERSECT) return false;
-                if (lhs.type == LOWER && rhs.type == INTERSECT) return true;
-                return rhs.p.x < lhs.p.x;
-            }
-            return lhs.p.y < rhs.p.y;
-        };
-        Point p;
-        int e1;
-        int e2;
-        EventType type;
+     Segment(Point p1, Point p2);
+     Segment(Point p1, Point p2, int id);
+     Segment();
+     Point p1;
+     Point p2;
+     int id;
 };
