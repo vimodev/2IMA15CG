@@ -32,6 +32,7 @@ Solution *TabuSearcher::search(Solution* sol, int iterations) {
 
     int cur_c = sol->get_clashes();
     vector<tuple<int,int>> *bests;
+    int prev = cur_c;
     int best;
     int best_c;
     int best_i;
@@ -73,12 +74,14 @@ Solution *TabuSearcher::search(Solution* sol, int iterations) {
         sol->colors->at(best_i) = best_j;
 
         cur_c = sol->get_clashes();
+        
         T[best_i][best_j] = iteration + cur_c*cur_c;
         
-        if (iteration % 100 == 0) {
-            cout << "Iteration: " << iteration << " for num_colors: " << k << endl;
-            cout << "NR OF CLASHES: " << cur_c << endl << endl;
+        if (prev > cur_c) {
+            cout << "[INFO] Iteration " << (iteration+1) << "/" << iterations << " of TabuCol found a solution with only " << cur_c << " clashes." << endl;
         }
+        prev = cur_c;
+
         if (cur_c == 0) break;
     }
 

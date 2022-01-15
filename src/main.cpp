@@ -53,20 +53,49 @@ int main(int argc, char **argv) {
 
     // Reading instance from json wokrs
     Instance inst(argv[1]);
-    cout << inst.id << " has " << inst.vertices->size() << " vertices and " << inst.edges->size() << " edges." << endl;
+    cout << "[INFO] " << inst.id << " has " << inst.vertices->size() << " vertices." << endl;
+    cout << "[INFO] " << inst.id << " has " << inst.edges->size() << " edges." << endl;
     Cache::set_instance(&inst);
-    Solution *sol = GreedySolver().solve(inst);
+    Solution *sol;
 
-    cout << "Solution found. Colors used: " << sol->num_colors << endl;
-    cout << "Checking validity..." << endl;
-
-    if(sol->check_validity()) {
-        cout << "Solution valid!" << endl;
-    } else {
-        cout << "Solution invalid!" << endl;
+    switch (*argv[2]) {
+        case '3': { 
+            cout << "[INFO] Running evolutionary solver." << endl;
+            Solution *bound_sol = DSaturSolver().solve(inst);
+            int bound = bound_sol->num_colors;
+            for (int i = bound-1; i > 0; i--) {
+                cout << "\n[INFO] Trying to find solution for " << i << " colors.\n" << endl;
+                sol = EvolutionarySolver(i).solve(inst);
+                if (!sol || !sol->check_validity()) break;
+                cout << "\n[INFO] Found solution for " << i << " colors.\n" << endl;
+                sol->to_file("../solutions/", true, "");
+            }
+            
+            break;
+        }
+        case '2': {
+            cout << "[INFO] Running DSatur solver." << endl;
+            sol = DSaturSolver().solve(inst);
+            break;
+        }
+        case '1': 
+        default: {
+            cout << "[INFO] Running greedy solver." << endl;
+            sol = GreedySolver().solve(inst);
+            break;
+        }
     }
 
+    cout << "[INFO] Solution found." << endl;
+
+    cout << "\n  -- SOLUTION  SUMMARY --  " << endl;
+    cout << "        Colors : " << sol->num_colors << endl;
+    cout << "        Valid? : " << (sol->check_validity() ? "YES" : "NO") << endl;
+    cout << "  - - - - - - - - - - - -  \n" << endl;
+
+    cout << "[INFO] Writing solution to file." << endl;
     sol->to_file("../solutions/", true, "");
 
+    cout << "\nDONE..." << endl;
     return 0;
 }

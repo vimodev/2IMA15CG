@@ -22,6 +22,8 @@ void Cache::set_instance(Instance *pInstance) {
 
     vector<Edge> *edges = pInstance->edges;
 
+    cout << "[INFO] Starting preparation." << endl;
+
     Sweepline::sweep(edges);
     int sum = 0;
     for (int i = 0; i < pInstance->m; i++) {
@@ -29,7 +31,8 @@ void Cache::set_instance(Instance *pInstance) {
             if (cache[i][j]) sum++;
         }
     }
-    cout << sum << endl;
+    cout << "\n  -- INTERSECTION  SUMMARY --  " << endl;
+    cout << "        Found    : " << sum << endl;
 
     #pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < pInstance->m; i++) {
@@ -48,15 +51,18 @@ void Cache::set_instance(Instance *pInstance) {
         }
     }
     
-    sum = 0;
+    int sum2 = 0;
     for (int i = 0; i < pInstance->m; i++) {
         for (int j = i + 1; j < pInstance->m; j++) {
-            if (cache[i][j]) sum++;
+            if (cache[i][j]) sum2++;
         }
     }
-    cout << sum << endl;
+    cout << "        Actual   : " << sum2 << endl;
+    cout << "        Accuracy : " << (sum*100/sum2) << "%" << endl;
+    cout << "  - - - - - - - - - - - - - -  \n" << endl;
 
-    cout << "Intersection cache filled." << endl;
+
+    cout << "[INFO] Intersection cache filled." << endl;
 
     // Since we cant atomically push_back we do it like this instead.
     #pragma omp parallel for schedule(dynamic)
@@ -69,7 +75,7 @@ void Cache::set_instance(Instance *pInstance) {
     }
 
     Cache::initialized = true;
-    cout << "Adjacency cache filled." << endl;
+    cout << "[INFO] Adjacency cache filled." << endl;
 }
 void Cache::setIntersect(int i, int j) {
     if (i > j) setIntersect(j, i);
