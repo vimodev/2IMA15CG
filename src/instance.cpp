@@ -1,6 +1,6 @@
 #include "instance.h"
 
-#define edge_limit 100000000
+#define edge_limit 100
 
 std::ostream &operator<<(std::ostream &os, Vertex const &v) { 
             return os << "(" << v.x << "," << v.y << ")";

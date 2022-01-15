@@ -145,7 +145,6 @@ string toString(EventType t) {
     return "intersect";
 }
 
-<<<<<<< HEAD
 void addBounds() {
     int min_x = INT_MAX;
     int min_y = INT_MAX;
