@@ -20,7 +20,7 @@ class Point {
 enum EventType {
     UPPER,
     LOWER,
-    INTERSECT
+    INTERSECTION
 };
 
 class Event {
@@ -28,12 +28,14 @@ class Event {
         Event(long double x, long double y, int e1, int e2, EventType type);
         friend bool operator<(Event const& lhs, Event const& rhs) {
             if (lhs.p.y == rhs.p.y) {
-                if (lhs.type == UPPER && rhs.type == LOWER) return false;
-                if (lhs.type == INTERSECT && rhs.type == LOWER) return false;
-                if (lhs.type == LOWER && rhs.type == UPPER) return true;
-                if (lhs.type == INTERSECT && rhs.type == UPPER) return true;
-                if (lhs.type == UPPER && rhs.type == INTERSECT) return false;
-                if (lhs.type == LOWER && rhs.type == INTERSECT) return true;
+                if (lhs.p.x == rhs.p.x) {
+                    if (lhs.type == UPPER && rhs.type == LOWER) return false;
+                    if (lhs.type == INTERSECTION && rhs.type == LOWER) return false;
+                    if (lhs.type == LOWER && rhs.type == UPPER) return true;
+                    if (lhs.type == INTERSECTION && rhs.type == UPPER) return true;
+                    if (lhs.type == UPPER && rhs.type == INTERSECTION) return false;
+                    if (lhs.type == LOWER && rhs.type == INTERSECTION) return true;
+                }
                 return rhs.p.x < lhs.p.x;
             }
             return lhs.p.y < rhs.p.y;
