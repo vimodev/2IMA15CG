@@ -286,6 +286,7 @@ void Sweepline::sweep(vector<Edge> *set) {
     keys.resize(set->size());
     insert_endpoints();
     addBounds();
+    int sum = 0;
     while (!Q.empty()) {
         Event e = Q.top();
         if (e.type == UPPER)        handleUpper(e);
@@ -294,8 +295,10 @@ void Sweepline::sweep(vector<Edge> *set) {
         Q.pop();
         // if (Q.size() % 1000 == 0) cout << Q.size() << endl;
         // cout << T.size() << endl;
-        if (Q.size() % 1000 == 0) cout << Q.size() << " " << T.size() << endl;
+        if (Q.size() % 10000 == 0) cout << "|Q|=" << Q.size() << " |T|=" << T.size() << endl;
         if (DEBUG) printStatus();
+        sum++;
     }
+    cout << "#events: " << sum << endl;
     removeBounds();
 }
