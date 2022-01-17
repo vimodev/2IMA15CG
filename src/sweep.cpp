@@ -28,6 +28,14 @@ Event::Event(long double x, long double y, int e1, int e2, EventType type) {
     this->type = type;
 }
 
+long double get_x_on_e_with_y(Edge e, long double y) {
+    if (e.v1->y == e.v2->y) {
+        return e.v1->x;
+    } else {
+        return e.v1->x + (e.v2->x - e.v1->x)*((y - e.v1->y)/(e.v2->y - e.v1->y));
+    }
+}
+
 static vector<Edge> *S;
 static vector<int> T;
 // static priority_queue<Event> Q;
@@ -41,11 +49,12 @@ string toString(EventType t) {
     return "intersect";
 }
 
-void printStatus() {
-    cout << "STATUS: ";
+void printStatus(double long y) {
+    cout << "STATUS at y:" << y << " -> ";
     for (int e : T) {
-        cout << "( edge " << e <<  " ) ";
+        cout << "[ edge" << e << " (" << get_x_on_e_with_y(S->at(e), y) << ") ]";
     }
+    cout << endl;
 };
 
 void printQueue() {
@@ -102,14 +111,6 @@ static Point getUpper(Edge e) {
     if (v1->y < v2->y) return {(long double)v2->x, (long double)v2->y};
     if (v1->x < v2->x) return {(long double)v1->x, (long double)v1->y};
     return {(long double)v2->x, (long double)v2->y};
-}
-
-long double get_x_on_e_with_y(Edge e, long double y) {
-    if (e.v1->y == e.v2->y) {
-        return e.v1->x;
-    } else {
-        return e.v1->x + (e.v2->x - e.v1->x)*((y - e.v1->y)/(e.v2->y - e.v1->y));
-    }
 }
 
 Point intersection_point(int i1, int i2) {
@@ -257,7 +258,7 @@ pair<StatusIter, StatusIter> getLeftRange(StatusIter iter, long double y) {
 
     StatusIter it1 = iter;
     for (; it1 != T.begin(); --it1) {
-        if (get_x_on_e_with_y(S->at(*it1), y) < x-2) break;
+        if (get_x_on_e_with_y(S->at(*it1), y) < x-1) break;
     }
 
     StatusIter it2 = iter;
@@ -279,7 +280,7 @@ pair<StatusIter, StatusIter> getRightRange(StatusIter iter, long double y) {
 
     StatusIter it2 = iter;
     for (; it2 != T.end(); ++it2) {
-        if (get_x_on_e_with_y(S->at(*it2), y) > x+2) break;
+        if (get_x_on_e_with_y(S->at(*it2), y) > x+1) break;
     }
 
 
@@ -402,7 +403,7 @@ void Sweepline::sweep(vector<Edge> *set) {
             long double perc = (starty - y) / (starty - endy) * 100.0;
             cout << "|Q|=" << Q.size() << " |T|=" << T.size() << " %=" << perc << endl;
         } 
-        if (DEBUG) printStatus();
+        if (DEBUG) printStatus(e.p.y);
         sum++;
     }
     cout << "#events: " << sum << endl;
