@@ -29,16 +29,22 @@ class Event {
         friend bool operator<(Event const& lhs, Event const& rhs) {
             if (lhs.p.y == rhs.p.y) {
                 if (lhs.p.x == rhs.p.x) {
-                    if (lhs.type == UPPER && rhs.type == LOWER) return false;
-                    if (lhs.type == INTERSECTION && rhs.type == LOWER) return false;
-                    if (lhs.type == LOWER && rhs.type == UPPER) return true;
-                    if (lhs.type == INTERSECTION && rhs.type == UPPER) return true;
-                    if (lhs.type == UPPER && rhs.type == INTERSECTION) return false;
-                    if (lhs.type == LOWER && rhs.type == INTERSECTION) return true;
+                    if (lhs.type == UPPER && rhs.type == LOWER) return true;
+                    if (lhs.type == INTERSECTION && rhs.type == LOWER) return true;
+                    if (lhs.type == LOWER && rhs.type == UPPER) return false;
+                    if (lhs.type == INTERSECTION && rhs.type == UPPER) return false;
+                    if (lhs.type == UPPER && rhs.type == INTERSECTION) return true;
+                    if (lhs.type == LOWER && rhs.type == INTERSECTION) return false;
+                    if (lhs.type == INTERSECTION && rhs.type == INTERSECTION) {
+                        if (lhs.e1 == rhs.e1 && lhs.e2 == rhs.e2) return false;
+                        if (lhs.e1 == rhs.e2 && lhs.e2 == rhs.e1) return false;
+                        return true;
+                    }
+                    return (lhs.e1 != rhs.e1);
                 }
-                return rhs.p.x < lhs.p.x;
+                return lhs.p.x < rhs.p.x || (lhs.e1 != rhs.e1) || (lhs.e2 != rhs.e2);
             }
-            return lhs.p.y < rhs.p.y;
+            return lhs.p.y > rhs.p.y;
         };
         Point p;
         int e1;

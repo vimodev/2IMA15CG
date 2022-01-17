@@ -30,8 +30,32 @@ Event::Event(long double x, long double y, int e1, int e2, EventType type) {
 static vector<Edge> *S;
 static vector<long double> keys;
 static multimap<long double, int> T;
-static priority_queue<Event> Q;
+// static priority_queue<Event> Q;
+static set<Event> Q;
 bitset<MAX_EDGES> queued[MAX_EDGES];
+
+
+string toString(EventType t) {
+    if (t == UPPER) return "upper";
+    if (t == LOWER) return "lower";
+    return "intersect";
+}
+
+void printStatus() {
+    cout << "STATUS: ";
+    for (auto p : T) {
+        cout << "(" << p.first << "," << p.second << ") ";
+    }
+    cout << endl;
+}
+
+void printQueue() {
+    cout << "QUEUE: ";
+    for (auto p : Q) {
+        cout << "(" << toString(p.type) << ", " << p.p.x << " " << p.p.y << ", " << p.e1 << ") ";
+    }
+    cout << endl;
+}
 
 void setQueued(int i, int j) {
     if (i > j) setQueued(j, i);
@@ -140,20 +164,6 @@ static StatusIter getIterator(long double x, int edge) {
 static StatusIter addStatus(long double key, int edge) {
     keys[edge] = key;
     return T.insert({key, edge});
-}
-
-void printStatus() {
-    cout << "STATUS: ";
-    for (auto p : T) {
-        cout << "(" << p.first << "," << p.second << ") ";
-    }
-    cout << endl;
-}
-
-string toString(EventType t) {
-    if (t == UPPER) return "upper";
-    if (t == LOWER) return "lower";
-    return "intersect";
 }
 
 void addBounds() {
@@ -288,14 +298,20 @@ void Sweepline::sweep(vector<Edge> *set) {
     addBounds();
     int sum = 0;
     while (!Q.empty()) {
-        Event e = Q.top();
+        Event e = *Q.begin();
+        Q.erase(Q.begin());
         if (e.type == UPPER)        handleUpper(e);
         if (e.type == LOWER)        handleLower(e);
         if (e.type == INTERSECTION) handleIntersection(e);
-        Q.pop();
         // if (Q.size() % 1000 == 0) cout << Q.size() << endl;
         // cout << T.size() << endl;
-        if (Q.size() % 10000 == 0) cout << "|Q|=" << Q.size() << " |T|=" << T.size() << endl;
+        if (sum % 10000 == 0) {
+            auto y = e.p.y;
+            long double starty = S->at(S->size() - 1).v1->y;
+            long double endy = S->at(S->size() - 1).v2->y;
+            long double perc = (starty - y) / (starty - endy) * 100.0;
+            cout << "|Q|=" << Q.size() << " |T|=" << T.size() << " %=" << perc << endl;
+        } 
         if (DEBUG) printStatus();
         sum++;
     }
