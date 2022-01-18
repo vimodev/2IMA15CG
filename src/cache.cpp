@@ -43,7 +43,7 @@ void Cache::set_instance(Instance *pInstance) {
             }
             if (cache[i][j]) continue;
             if (intersect) {
-                // cout << i << " " << j << endl;
+                //cout << "MISSING:" <<  i << " " << j << endl;
                 counts[i] += 1;
                 counts[j] += 1;
             }
@@ -58,7 +58,7 @@ void Cache::set_instance(Instance *pInstance) {
         }
     }
     cout << "        Actual   : " << sum2 << endl;
-    cout << "        Accuracy : " << (sum*100/sum2) << "%" << endl;
+    cout << "        Accuracy : " << (sum*100.0/sum2) << "%" << endl;
     cout << "  - - - - - - - - - - - - - -  \n" << endl;
 
 

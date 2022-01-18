@@ -273,18 +273,31 @@ void removeBounds() {
 }
 
 pair<StatusIter, StatusIter> getLeftRange(StatusIter iter, long double y) {
-    int x = get_x_on_e_with_y(S->at(*(iter)), y);
+    long double x = get_x_on_e_with_y(S->at(*(iter)), y);
 
     StatusIter it1 = iter;
+    long double start = x;
+    int counter = 0;
     for (; it1 != T.begin(); --it1) {
-        if (get_x_on_e_with_y(S->at(*it1), y) < x-1) break;
+        long double test = get_x_on_e_with_y(S->at(*it1), y);
+        if (test != start) {
+            start = test;
+            counter++;
+            if (counter > 15) break;
+        }
     }
 
     StatusIter it2 = iter;
+    start = x;
+    counter = 0;
     for (; it2 != T.end(); ++it2) {
-        if (get_x_on_e_with_y(S->at(*it2), y) > x+02) break;
+        long double test = get_x_on_e_with_y(S->at(*it2), y);
+        if (test != start) {
+            start = test;
+            counter++;
+            if (counter > 15) break;
+        }
     }
-
 
     return {it1, it2};
 }
@@ -294,22 +307,25 @@ pair<StatusIter, StatusIter> getRightRange(StatusIter iter, long double y) {
 
     StatusIter it1 = iter;
     long double start = x;
-    bool doBreak = false;
+    int counter = 0;
     for (; it1 != T.begin(); --it1) {
         long double test = get_x_on_e_with_y(S->at(*it1), y);
         if (test != start) {
-            if (doBreak) break;
-            doBreak = true;
+            start = test;
+            counter++;
+            if (counter > 15) break;
         }
     }
 
     StatusIter it2 = iter;
-    doBreak = false;
+    start = x;
+    counter = 0;
     for (; it2 != T.end(); ++it2) {
         long double test = get_x_on_e_with_y(S->at(*it2), y);
         if (test != start) {
-            if (doBreak) break;
-            doBreak = true;
+            start = test;
+            counter++;
+            if (counter > 15) break;
         }
     }
 
