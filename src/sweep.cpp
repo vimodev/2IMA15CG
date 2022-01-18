@@ -10,7 +10,7 @@
 
 #include "cache.h"
 
-#define DEBUG true
+#define DEBUG false
 
 typedef std::vector<int>::iterator StatusIter;
 
@@ -75,19 +75,19 @@ string toString(EventType t) {
 }
 
 void printStatus(double long y) {
-    cout << "STATUS at y:" << y << " -> ";
+    if (DEBUG) cout << "STATUS at y:" << y << " -> ";
     for (int e : T) {
-        cout << "[ edge" << e << " (" << get_x_on_e_with_y(S->at(e), y) << ") ]";
+        if (DEBUG) cout << "[ edge" << e << " (" << get_x_on_e_with_y(S->at(e), y) << ") ]";
     }
-    cout << endl;
+    if (DEBUG) cout << endl;
 };
 
 void printQueue() {
-    cout << "QUEUE: ";
+    if (DEBUG) cout << "QUEUE: ";
     for (auto p : Q) {
-        cout << "(" << toString(p.type) << ", " << p.p.x << " " << p.p.y << ", " << p.e1 << ") ";
+        if (DEBUG) cout << "(" << toString(p.type) << ", " << p.p.x << " " << p.p.y << ", " << p.e1 << ") ";
     }
-    cout << endl;
+    if (DEBUG) cout << endl;
 }
 
 void setQueued(int i, int j) {
@@ -178,6 +178,7 @@ Point intersection_point(int i1, int i2) {
 }
 
 static StatusIter getIteratorRec(long double x, long double slope, long double y, int e, int l, int r) {
+    if (DEBUG) cout << "Searching edge: " << e << " with x: " << x << " y: " << y << " and slope: " << slope << " ... between l:" << l << " and r:" << r << endl;
     if (r >= l) {
         int mid = l + (r - l) / 2;
         if (T[mid] == e) {
@@ -186,7 +187,8 @@ static StatusIter getIteratorRec(long double x, long double slope, long double y
         Edge mid_e = S->at(T[mid]);
         long double mid_x = get_x_on_e_with_y(mid_e, y);
         long double mid_slope = get_slope(mid_e);
-        if (mid_x > x || (mid_x == x && mid_slope > slope)) {
+        if (DEBUG) cout << "Checking [mid=edge" << T[mid] << "] has x: " << mid_x << " and slope: " << mid_slope << endl;
+        if (mid_x > x || (mid_x == x && mid_slope < slope)) {
             return getIteratorRec(x, slope, y, e, l, mid - 1);
         } else {
             return getIteratorRec(x, slope, y, e, mid + 1, r);
@@ -199,24 +201,25 @@ static StatusIter getIterator(long double y, int e) {
     Edge edge = S->at(e);
     long double x = get_x_on_e_with_y(edge, y);
     long double slope = get_slope(edge);
-    return getIteratorRec(x, slope, y, e, 0, T.size());
+    // return getIteratorRec(x, slope, y, e, 0, T.size());
+    return find(T.begin(), T.end(), e);
 }
 
 static StatusIter addStatusRec(long double x, long double slope, long double y, int e, int l, int r) {
-    cout << "Adding edge: " << e << " with x: " << x << " y: " << y << " and slope: " << slope << " ... between l:" << l << " and r:" << r << endl;
+    if (DEBUG) cout << "Adding edge: " << e << " with x: " << x << " y: " << y << " and slope: " << slope << " ... between l:" << l << " and r:" << r << endl;
     if (r >= l) {
         int mid = l + (r - l) / 2;
         if (mid >= T.size()) {
-            cout << "inserting edge: " << e << " at " << mid << endl;
+            if (DEBUG) cout << "inserting edge: " << e << " at " << mid << endl;
             T.insert(T.begin() + mid, e);
             return T.begin() + mid;
         }
         Edge mid_e = S->at(T[mid]);
         long double mid_x = get_x_on_e_with_y(mid_e, y);
         long double mid_slope = get_slope(mid_e);
-        cout << "Checking [mid=edge" << mid << "] has x: " << mid_x << " and slope: " << mid_slope << endl;
+        if (DEBUG) cout << "Checking [mid=edge" << mid << "] has x: " << mid_x << " and slope: " << mid_slope << endl;
         if (mid_x == x && mid_slope == slope) {
-            cout << "inserting edge: " << e << " at " << mid << endl;
+            if (DEBUG) cout << "inserting edge: " << e << " at " << mid << endl;
             T.insert(T.begin() + mid, e);
             return T.begin() + mid;
         }
@@ -227,7 +230,7 @@ static StatusIter addStatusRec(long double x, long double slope, long double y, 
             return addStatusRec(x, slope, y, e, mid + 1, r);
         }
     }
-    cout << "inserting edge: " << e << " at " << l << endl;
+    if (DEBUG) cout << "inserting edge: " << e << " at " << l << endl;
     T.insert(T.begin() + l, e);
     return T.begin() + l;
 }
@@ -266,7 +269,7 @@ void addBounds() {
     Vertex *bottom_right = new Vertex(max_x + 1, min_y - 1);
     S->emplace_back(top_left, bottom_left);
     S->emplace_back(top_right, bottom_right);
-    cout << S->size()-2 << " " << S->size()-1 << endl;
+    if (DEBUG) cout << S->size()-2 << " " << S->size()-1 << endl;
     addStatus(0, S->size()-2);
     addStatus(0, S->size()-1);
 }
@@ -277,46 +280,56 @@ void removeBounds() {
 }
 
 pair<StatusIter, StatusIter> getLeftRange(StatusIter iter, long double y) {
-    int x = get_x_on_e_with_y(S->at(*(iter-1)), y);
+    if (DEBUG) cout << y << " " << *iter << endl;
 
-    StatusIter it1 = iter;
-    for (; it1 != T.begin(); --it1) {
-        if (get_x_on_e_with_y(S->at(*it1), y) < x-1) break;
+    long double x = get_x_on_e_with_y(S->at(*(iter)), y);
+
+    int counter = 0;
+    long double last = x;
+    StatusIter iter_c = iter;
+    for (; iter_c != T.begin(); --iter_c) {
+        long double cur_x = get_x_on_e_with_y(S->at(*iter_c), y);
+        if (cur_x != last) {
+            last = cur_x;
+            counter++;
+        }
+        if (counter > 1) {
+            break;
+        }
     }
 
-    StatusIter it2 = iter;
-    for (; it2 != T.end(); ++it2) {
-        if (get_x_on_e_with_y(S->at(*it2), y) > x) break;
-    }
-
-
-    return {it1, it2};
+    return {iter_c, iter};
 }
 
 pair<StatusIter, StatusIter> getRightRange(StatusIter iter, long double y) {
-    int x = get_x_on_e_with_y(S->at(*(iter+1)), y);
+    if (DEBUG) cout << y << " " << *iter << endl;
 
-    StatusIter it1 = iter;
-    for (; it1 != T.begin(); --it1) {
-        if (get_x_on_e_with_y(S->at(*it1), y) < x) break;
+    long double x = get_x_on_e_with_y(S->at(*(iter)), y);
+
+    int counter = 0;
+    long double last = x;
+    StatusIter iter_c = iter;
+    for (; iter_c != T.end(); ++iter_c) {
+        long double cur_x = get_x_on_e_with_y(S->at(*iter_c), y);
+        if (cur_x != last) {
+            last = cur_x;
+            counter++;
+        }
+        if (counter > 1) {
+            break;
+        }
     }
 
-    StatusIter it2 = iter;
-    for (; it2 != T.end(); ++it2) {
-        if (get_x_on_e_with_y(S->at(*it2), y) > x+1) break;
-    }
-
-
-    return {it1, it2};
+    return {iter, iter_c};
 }
 
 void handleUpper(Event e) {
     if (DEBUG) cout << "[DEBUG] Upper endpoint of edge:" << e.e1 << " at (" << e.p.x << ", " << e.p.y << ")" << endl;
     auto loc = addStatus(e.p.y, e.e1);
     auto range = getLeftRange(loc, e.p.y);
-    cout << *range.first << " - " << *range.second << endl;
+    if (DEBUG) cout << *range.first << " - " << *range.second << endl;
     for (auto other = range.first; other != range.second; other++) {
-        cout << *other << " loc:" << *loc << endl;
+        if (DEBUG) cout << *other << " loc:" << *loc << endl;
         if (loc == other) {
             continue;
         }
@@ -327,9 +340,9 @@ void handleUpper(Event e) {
         }
     }
     range = getRightRange(loc, e.p.y);
-    cout << *range.first << " - " << *range.second << endl;
+    if (DEBUG) cout << *range.first << " - " << *range.second << endl;
     for (auto other = range.first; other != range.second; other++) {
-        cout << *other << " loc:" << *loc << endl;
+        if (DEBUG) cout << *other << " loc:" << *loc << endl;
         if (loc == other) {
             continue;
         }
@@ -365,13 +378,14 @@ void handleLower(Event e) {
 pair<StatusIter, StatusIter> getRange(int e1, int e2, long double cur_y) {
     auto i1 = getIterator(cur_y, e1);
     auto i2 = getIterator(cur_y, e2);
-    // if (distance(i1, T.end()) > distance(i2, T.end())) return {i1, i2};
+    if (distance(i1, T.end()) > distance(i2, T.end())) return {i1, i2};
     return {i2, i1};
 }
 
 pair<StatusIter, StatusIter> swapSegments(int e1, int e2, long double cur_y) {
     auto i1 = getIterator(cur_y, e1);
     auto i2 = getIterator(cur_y, e2);
+    if (DEBUG) cout << *i1 << ", " << *i2 << endl;
     iter_swap(i1, i2);
     return getRange(e1, e2, cur_y);
 }
@@ -380,19 +394,16 @@ void handleIntersection(Event e) {
     if (Cache::intersects(e.e1, e.e2)) return;
     if (DEBUG) cout << "[DEBUG] Intersection between edge:" << e.e1 << " and edge:" << e.e2 << " at (" << e.p.x << ", " << e.p.y << ")" << endl;
     auto swapped = swapSegments(e.e1, e.e2, e.p.y);
-    cout << *(swapped.first) << " " << *(swapped.second) << endl;
+    printStatus(e.p.y);
+    if (DEBUG) cout << *(swapped.first) << " " << *(swapped.second) << endl;
     auto left = getLeftRange(swapped.first, e.p.y);
+    if (DEBUG) cout << "left: " << *left.first << " - " << *left.second << endl;
     auto right = getRightRange(swapped.second, e.p.y);
-    cout << "left: " << *left.first << " - " << *left.second << endl;
-    cout << "right: " << *right.first << " - " << *right.second << endl;
-
-    for (auto i1 = T.begin(); i1 != T.end(); i1++) {
-        cout << *i1 << endl;
-    }
+    if (DEBUG) cout << "right: " << *right.first << " - " << *right.second << endl;
 
     for (auto i1 = left.first; i1 != right.second; i1++) {
         for (auto i2 = left.first; i2 != right.second; i2++) {
-            cout << *i1 << " " << *i2 << endl;
+            if (DEBUG) cout << *i1 << " " << *i2 << endl;
             if (i1 == i2) continue;
             if (!getQueued(*i1, *i2) && Edge::intersect(&S->at(*i1), &S->at(*i2))) {
                 Point p = intersection_point(*i1, *i2);
@@ -429,6 +440,6 @@ void Sweepline::sweep(vector<Edge> *set) {
         if (DEBUG) printStatus(e.p.y);
         sum++;
     }
-    cout << "#events: " << sum << endl;
+    if (DEBUG) cout << "#events: " << sum << endl;
     removeBounds();
 }
