@@ -42,7 +42,7 @@ class Event {
                     }
                     return (lhs.e1 != rhs.e1);
                 }
-                return lhs.p.x < rhs.p.x || (lhs.e1 != rhs.e1) || (lhs.e2 != rhs.e2);
+                return lhs.p.x < rhs.p.x;
             }
             return lhs.p.y > rhs.p.y;
         };
