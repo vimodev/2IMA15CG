@@ -36,6 +36,31 @@ long double get_x_on_e_with_y(Edge e, long double y) {
     }
 }
 
+static Point getUpper(Edge e) {
+    Vertex *v1 = e.v1;
+    Vertex *v2 = e.v2;
+    if (v1->y > v2->y) return {(long double)v1->x, (long double)v1->y};
+    if (v1->y < v2->y) return {(long double)v2->x, (long double)v2->y};
+    if (v1->x < v2->x) return {(long double)v1->x, (long double)v1->y};
+    return {(long double)v2->x, (long double)v2->y};
+}
+
+static Point getLower(Edge e) {
+    Vertex *v1 = e.v1;
+    Vertex *v2 = e.v2;
+    if (v1->y > v2->y) return {(long double)v2->x, (long double)v2->y};
+    if (v1->y < v2->y) return {(long double)v1->x, (long double)v1->y};
+    if (v1->x < v2->x) return {(long double)v2->x, (long double)v2->y};
+    return {(long double)v1->x, (long double)v1->y};
+}
+
+long double get_slope(Edge e) {
+    Point origin = getUpper(e);
+    Point p = getLower(e);
+    Point p_transformed = {p.x - origin.x, p.y - origin.y};
+    return atan2(p_transformed.y,p_transformed.x) * 180 / 3.14;
+}
+
 static vector<Edge> *S;
 static vector<int> T;
 // static priority_queue<Event> Q;
@@ -104,14 +129,7 @@ static void insert_endpoints() {
     }
 }
 
-static Point getUpper(Edge e) {
-    Vertex *v1 = e.v1;
-    Vertex *v2 = e.v2;
-    if (v1->y > v2->y) return {(long double)v1->x, (long double)v1->y};
-    if (v1->y < v2->y) return {(long double)v2->x, (long double)v2->y};
-    if (v1->x < v2->x) return {(long double)v1->x, (long double)v1->y};
-    return {(long double)v2->x, (long double)v2->y};
-}
+
 
 Point intersection_point(int i1, int i2) {
     auto e1 = S->at(i1); auto e2 = S->at(i2);
@@ -159,18 +177,19 @@ Point intersection_point(int i1, int i2) {
     }
 }
 
-static StatusIter getIteratorRec(long double x, long double y, int e, int l, int r) {
+static StatusIter getIteratorRec(long double x, long double slope, long double y, int e, int l, int r) {
     if (r >= l) {
         int mid = l + (r - l) / 2;
         if (T[mid] == e) {
             return T.begin() + mid;
         }
         Edge mid_e = S->at(T[mid]);
-        int mid_x = get_x_on_e_with_y(mid_e, y);
-        if (mid_x > x) {
-            return getIteratorRec(x, y, e, l, mid - 1);
+        long double mid_x = get_x_on_e_with_y(mid_e, y);
+        long double mid_slope = get_slope(mid_e);
+        if (mid_x > x || (mid_x == x && mid_slope > slope)) {
+            return getIteratorRec(x, slope, y, e, l, mid - 1);
         } else {
-            return getIteratorRec(x, y, e, mid + 1, r);
+            return getIteratorRec(x, slope, y, e, mid + 1, r);
         }
     }
     return T.end();
@@ -179,11 +198,12 @@ static StatusIter getIteratorRec(long double x, long double y, int e, int l, int
 static StatusIter getIterator(long double y, int e) {
     Edge edge = S->at(e);
     long double x = get_x_on_e_with_y(edge, y);
-    return getIteratorRec(x, y, e, 0, T.size());
+    long double slope = get_slope(edge);
+    return getIteratorRec(x, slope, y, e, 0, T.size());
 }
 
-static StatusIter addStatusRec(long double x, long double y, int e, int l, int r) {
-    cout << "adding with x:" << x << " y:" << y << " the edge:" << e << "... between l:" << l << " and r:" << r << endl;
+static StatusIter addStatusRec(long double x, long double slope, long double y, int e, int l, int r) {
+    cout << "Adding edge: " << e << " with x: " << x << " y: " << y << " and slope: " << slope << " ... between l:" << l << " and r:" << r << endl;
     if (r >= l) {
         int mid = l + (r - l) / 2;
         if (mid >= T.size()) {
@@ -192,17 +212,19 @@ static StatusIter addStatusRec(long double x, long double y, int e, int l, int r
             return T.begin() + mid;
         }
         Edge mid_e = S->at(T[mid]);
-        int mid_x = get_x_on_e_with_y(mid_e, y);
-        cout << "mid at " << mid << " has x: " << mid_x << endl;
-        if (mid_x == x) {
+        long double mid_x = get_x_on_e_with_y(mid_e, y);
+        long double mid_slope = get_slope(mid_e);
+        cout << "Checking [mid=edge" << mid << "] has x: " << mid_x << " and slope: " << mid_slope << endl;
+        if (mid_x == x && mid_slope == slope) {
             cout << "inserting edge: " << e << " at " << mid << endl;
             T.insert(T.begin() + mid, e);
             return T.begin() + mid;
         }
-        if (mid_x > x) {
-            return addStatusRec(x, y, e, l, mid - 1);
+        
+        if (mid_x > x || (mid_x == x && mid_slope > slope)) {
+            return addStatusRec(x, slope, y, e, l, mid - 1);
         } else {
-            return addStatusRec(x, y, e, mid + 1, r);
+            return addStatusRec(x, slope, y, e, mid + 1, r);
         }
     }
     cout << "inserting edge: " << e << " at " << l << endl;
@@ -213,11 +235,12 @@ static StatusIter addStatusRec(long double x, long double y, int e, int l, int r
 static StatusIter addStatus(long double y, int e) {
     Edge edge = S->at(e);
     long double x = get_x_on_e_with_y(edge, y);
+    long double slope = get_slope(edge);
     if (T.size() == 0) {
         T.push_back(e);
         return T.begin();
     }
-    return addStatusRec(x, y, e, 0, T.size());
+    return addStatusRec(x, slope, y, e, 0, T.size());
 }
 
 void addBounds() {
