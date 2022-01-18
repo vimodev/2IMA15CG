@@ -2,6 +2,7 @@
 
 #define edge_limit 100000000
 
+
 std::ostream &operator<<(std::ostream &os, Vertex const &v) { 
             return os << "(" << v.x << "," << v.y << ")";
         }

@@ -427,6 +427,15 @@ void Sweepline::sweep(vector<Edge> *set) {
         if (e.type == UPPER)        handleUpper(e);
         if (e.type == LOWER)        handleLower(e);
         if (e.type == INTERSECTION) handleIntersection(e);
+        Edge left = S->at(S->size() - 2);
+        long double prev_x = left.v1->x - 1;
+        for (auto el : T) {
+            long double new_x = get_x_on_e_with_y(S->at(el), e.p.y);
+            if (prev_x - new_x > __LDBL_EPSILON__) {
+                cout << "KANKER " << prev_x << " " << new_x << endl;
+            }
+            prev_x = new_x;
+        }
         // if (Q.size() % 1000 == 0) cout << Q.size() << endl;
         // cout << T.size() << endl;
         if (sum % 10000 == 0) {
