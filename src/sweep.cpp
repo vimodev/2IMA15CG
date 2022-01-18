@@ -30,7 +30,7 @@ Event::Event(long double x, long double y, int e1, int e2, EventType type) {
 
 long double get_x_on_e_with_y(Edge e, long double y) {
     if (e.v1->y == e.v2->y) {
-        return e.v1->x;
+        return min(e.v1->x, e.v2->x);
     } else {
         return e.v1->x + (e.v2->x - e.v1->x)*((y - e.v1->y)/(e.v2->y - e.v1->y));
     }
@@ -57,8 +57,11 @@ static Point getLower(Edge e) {
 long double get_slope(Edge e) {
     Point origin = getUpper(e);
     Point p = getLower(e);
-    Point p_transformed = {p.x - origin.x, p.y - origin.y};
-    return atan2(p_transformed.y,p_transformed.x) * 180 / 3.14;
+    long double x = p.x - origin.x;
+    long double y = p.y - origin.y;
+    long double angle = atan2(y, x);
+    if (angle < 0) angle += M_PI;
+    return angle;
 }
 
 static vector<Edge> *S;
@@ -77,7 +80,7 @@ string toString(EventType t) {
 void printStatus(double long y) {
     cout << "STATUS at y:" << y << " -> ";
     for (int e : T) {
-        cout << "[ edge" << e << " (" << get_x_on_e_with_y(S->at(e), y) << ") ]";
+        cout << "[ edge" << e << " (" << get_x_on_e_with_y(S->at(e), y) << " | " << get_slope(S->at(e)) << " ) ]";
     }
     cout << endl;
 };
@@ -128,8 +131,6 @@ static void insert_endpoints() {
         }
     }
 }
-
-
 
 Point intersection_point(int i1, int i2) {
     auto e1 = S->at(i1); auto e2 = S->at(i2);
@@ -219,7 +220,7 @@ static StatusIter addStatusRec(long double x, long double slope, long double y, 
             return T.begin() + mid;
         }
         
-        if (mid_x > x || (mid_x == x && mid_slope > slope)) {
+        if (mid_x > x || (mid_x == x && slope < mid_slope)) {
             return addStatusRec(x, slope, y, e, l, mid - 1);
         } else {
             return addStatusRec(x, slope, y, e, mid + 1, r);
@@ -272,7 +273,7 @@ void removeBounds() {
     S->pop_back();
 }
 
-pair<StatusIter, StatusIter> getLeftRange(StatusIter iter, long double y) {
+pair<StatusIter, StatusIter> getEqualityRange(StatusIter iter, long double y) {
     long double x = get_x_on_e_with_y(S->at(*(iter)), y);
 
     StatusIter it1 = iter;
@@ -283,7 +284,7 @@ pair<StatusIter, StatusIter> getLeftRange(StatusIter iter, long double y) {
         if (test != start) {
             start = test;
             counter++;
-            if (counter > 15) break;
+            if (counter > 1) break;
         }
     }
 
@@ -295,37 +296,7 @@ pair<StatusIter, StatusIter> getLeftRange(StatusIter iter, long double y) {
         if (test != start) {
             start = test;
             counter++;
-            if (counter > 15) break;
-        }
-    }
-
-    return {it1, it2};
-}
-
-pair<StatusIter, StatusIter> getRightRange(StatusIter iter, long double y) {
-    long double x = get_x_on_e_with_y(S->at(*(iter)), y);
-
-    StatusIter it1 = iter;
-    long double start = x;
-    int counter = 0;
-    for (; it1 != T.begin(); --it1) {
-        long double test = get_x_on_e_with_y(S->at(*it1), y);
-        if (test != start) {
-            start = test;
-            counter++;
-            if (counter > 15) break;
-        }
-    }
-
-    StatusIter it2 = iter;
-    start = x;
-    counter = 0;
-    for (; it2 != T.end(); ++it2) {
-        long double test = get_x_on_e_with_y(S->at(*it2), y);
-        if (test != start) {
-            start = test;
-            counter++;
-            if (counter > 15) break;
+            if (counter > 1) break;
         }
     }
 
@@ -333,9 +304,10 @@ pair<StatusIter, StatusIter> getRightRange(StatusIter iter, long double y) {
 }
 
 void handleUpper(Event e) {
-    if (DEBUG) cout << "[DEBUG] Upper endpoint of edge:" << e.e1 << " at (" << e.p.x << ", " << e.p.y << ")" << endl;
+    if (DEBUG) cout << "[DEBUG] Upper endpoint of edge:" << e.e1 << " at (" << e.p.x << ", " << e.p.y << ")" << " with slope " << get_slope(S->at(e.e1))<< endl;
     auto loc = addStatus(e.p.y, e.e1);
-    auto range = getLeftRange(loc, e.p.y);
+    auto range = getEqualityRange(loc, e.p.y);
+    range.second = loc + 1;
     for (auto other = range.first; other != range.second; other++) {
         if (loc == other) {
             continue;
@@ -346,7 +318,8 @@ void handleUpper(Event e) {
             setQueued(*loc, *other);
         }
     }
-    range = getRightRange(loc, e.p.y);
+    range = getEqualityRange(loc, e.p.y);
+    range.first = loc - 1;
     for (auto other = range.first; other != range.second; other++) {
         if (loc == other) {
             continue;
@@ -362,8 +335,13 @@ void handleUpper(Event e) {
 void handleLower(Event e) {
     if (DEBUG) cout << "[DEBUG] Lower endpoint of edge: " << e.e1 << " at (" << e.p.x << ", " << e.p.y << ")" << endl;
     auto loc = find(T.begin(), T.end(), e.e1);
-    auto left = getLeftRange(loc, e.p.y);
-    auto right = getRightRange(loc, e.p.y);
+
+    auto left = getEqualityRange(loc, e.p.y);
+    left.second = loc + 1;
+
+    auto right = getEqualityRange(loc, e.p.y);
+    right.first = loc - 1;
+
     if (*(right.first) == e.e1) right.first = next(right.first);
     T.erase(loc);
     for (auto l = left.first; l != left.second; l++) {
@@ -398,8 +376,12 @@ void handleIntersection(Event e) {
     if (Cache::intersects(e.e1, e.e2)) return;
     if (DEBUG) cout << "[DEBUG] Intersection between edge:" << e.e1 << " and edge:" << e.e2 << " at (" << e.p.x << ", " << e.p.y << ")" << endl;
     auto swapped = swapSegments(e.e1, e.e2, e.p.y);
-    auto left = getLeftRange(swapped.first, e.p.y);
-    auto right = getRightRange(swapped.second, e.p.y);
+
+    auto left = getEqualityRange(swapped.first, e.p.y);
+    left.second = swapped.first + 1;
+
+    auto right = getEqualityRange(swapped.second, e.p.y);
+    right.first = swapped.second - 1;
 
     for (auto i1 = left.first; i1 != right.second; i1++) {
         for (auto i2 = left.first; i2 != right.second; i2++) {
@@ -429,15 +411,6 @@ void Sweepline::sweep(vector<Edge> *set) {
         if (e.type == INTERSECTION) handleIntersection(e);
         Edge left = S->at(S->size() - 2);
         long double prev_x = left.v1->x - 1;
-        for (auto el : T) {
-            long double new_x = get_x_on_e_with_y(S->at(el), e.p.y);
-            if (prev_x - new_x > __LDBL_EPSILON__) {
-                cout << "KANKER " << prev_x << " " << new_x << endl;
-            }
-            prev_x = new_x;
-        }
-        // if (Q.size() % 1000 == 0) cout << Q.size() << endl;
-        // cout << T.size() << endl;
         if (sum % 10000 == 0) {
             auto y = e.p.y;
             long double starty = S->at(S->size() - 1).v1->y;

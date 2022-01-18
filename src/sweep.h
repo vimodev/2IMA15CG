@@ -29,9 +29,9 @@ class Event {
         friend bool operator<(Event const& lhs, Event const& rhs) {
             if (lhs.p.y == rhs.p.y) {
                 if (lhs.p.x == rhs.p.x) {
-                    if (lhs.type == UPPER && rhs.type == LOWER) return true;
+                    if (lhs.type == UPPER && rhs.type == LOWER) return false;
                     if (lhs.type == INTERSECTION && rhs.type == LOWER) return true;
-                    if (lhs.type == LOWER && rhs.type == UPPER) return false;
+                    if (lhs.type == LOWER && rhs.type == UPPER) return true;
                     if (lhs.type == INTERSECTION && rhs.type == UPPER) return false;
                     if (lhs.type == UPPER && rhs.type == INTERSECTION) return true;
                     if (lhs.type == LOWER && rhs.type == INTERSECTION) return false;
