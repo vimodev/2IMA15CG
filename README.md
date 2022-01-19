@@ -26,12 +26,12 @@ The instances/ folder contains the problem instances defined by the challenge. b
 
 `./app {file} {a}`
 
-Where `{file}` is a JSON instance file as described by [the challenge](https://cgshop.ibr.cs.tu-bs.de/competition/cg-shop-2022/#instance-format)
+Where `{file}` is a JSON instance file as described by [the challenge](https://cgshop.ibr.cs.tu-bs.de/competition/cg-shop-2022/#instance-format).
 
 Where `{a}` can be one of the following:
-- `a=1` Standard greedy solver.
-- `a=2` DSatur solver.
-- `a=3` HEA solver.
+- `a=1` Standard greedy solver
+- `a=2` DSatur solver
+- `a=3` HEA solver
 
 
 ## Checklist
