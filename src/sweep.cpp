@@ -70,7 +70,7 @@ static vector<int> T;
 static set<Event> Q;
 static set<Event> holding;
 bitset<MAX_EDGES> queued[MAX_EDGES];
-
+static bool doDebug = false;
 
 string toString(EventType t) {
     if (t == UPPER) return "upper";
@@ -180,24 +180,47 @@ Point intersection_point(int i1, int i2) {
 }
 
 static StatusIter getIteratorRec(long double x, long double slope, long double y, int e, int l, int r) {
-    cout << "Searching for edge " << x << " , " << e << " at right " << r << " and left " << l <<endl;
+//    cout << "Searching for edge " << x << " , " << e << " at right " << r << " and left " << l <<endl;
     if (r >= l) {
         int mid = l + (r - l) / 2;
-        cout << "mid: " << mid << endl;
+//        cout << "mid: " << mid << endl;
         if (T[mid] == e) {
+//            cout << "T[mid]: " << T[mid] << endl;
+//            cout << "Found edge at " << mid << endl;
             return T.begin() + mid;
         }
         Edge mid_e = S->at(T[mid]);
         long double mid_x = get_x_on_e_with_y(mid_e, y);
-        cout << "midx: " << mid_x << endl;
-        cout << "T[mid]: " << T[mid] << endl;
-        long double mid_slope = get_slope(mid_e);
+//        cout << "midx: " << mid_x << endl;
+//        cout << "T[mid]: " << T[mid] << endl;
+//        cout << (mid_x > x) << endl;
+        long double margin = 0.000000001;
+        if (abs(mid_x-x) < margin) {
+//            cout << " close call " << endl;
+            int leftIndex = mid;
+            Edge leftEdge = S->at(T[leftIndex]);
+            long double leftEdge_x = get_x_on_e_with_y(leftEdge, y);
+            while(abs(leftEdge_x-x) < margin) {
+                leftIndex--;
+                leftEdge = S->at(T[leftIndex]);
+                leftEdge_x = get_x_on_e_with_y(leftEdge, y);
+            }
 
-        if (mid_x > x || (mid_x == x && slope < mid_slope)) {
-            cout << "searching left" << endl;
+            int rightIndex = mid;
+            Edge rightEdge = S->at(T[rightIndex]);
+            long double rightEdge_x = get_x_on_e_with_y(rightEdge, y);
+            while(abs(rightEdge_x-x) < margin) {
+                rightIndex++;
+                rightEdge = S->at(T[rightIndex]);
+                rightEdge_x = get_x_on_e_with_y(rightEdge, y);
+            }
+
+            return find(T.begin() + leftIndex, T.begin()+rightIndex, e);
+        }
+
+        if (mid_x > x) {
             return getIteratorRec(x, slope, y, e, l, mid - 1);
         } else {
-            cout << "searching right" << endl;
             return getIteratorRec(x, slope, y, e, mid + 1, r);
         }
     }
@@ -205,11 +228,15 @@ static StatusIter getIteratorRec(long double x, long double slope, long double y
 }
 
 static StatusIter getIterator(long double y, int e) {
+//    for (auto edge: T) {
+//        cout << edge << ", ";
+//    }
+//    cout << endl;
     Edge edge = S->at(e);
     long double x = get_x_on_e_with_y(edge, y);
     long double slope = get_slope(edge);
-    return find(T.begin(), T.end(), e);
-//    return getIteratorRec(x, slope, y, e, 0, T.size());
+//    return find(T.begin(), T.end(), e);
+    return getIteratorRec(x, slope, y, e, 0, T.size());
 }
 
 static StatusIter addStatusRec(long double x, long double slope, long double y, int e, int l, int r) {
@@ -291,7 +318,7 @@ pair<StatusIter, StatusIter> getEqualityRange(StatusIter iter, long double y) {
         if (test != start) {
             start = test;
             counter++;
-            if (counter > 2) break;
+            if (counter > 1) break;
         }
     }
 
@@ -303,7 +330,7 @@ pair<StatusIter, StatusIter> getEqualityRange(StatusIter iter, long double y) {
         if (test != start) {
             start = test;
             counter++;
-            if (counter > 2) break;
+            if (counter > 1) break;
         }
     }
 
@@ -340,8 +367,8 @@ void handleUpper(Event e) {
 }
 
 void handleLower(Event e) {
-    if (DEBUG) cout << "[DEBUG] Lower endpoint of edge: " << e.e1 << " at (" << e.p.x << ", " << e.p.y << ")" << endl;
-    auto loc = find(T.begin(), T.end(), e.e1);
+    if (doDebug) cout << "[DEBUG] Lower endpoint of edge: " << e.e1 << " at (" << e.p.x << ", " << e.p.y << ")" << endl;
+    auto loc = getIterator(e.p.y, e.e1);
 
     auto left = getEqualityRange(loc, e.p.y);
     left.second = loc + 1;
@@ -365,9 +392,7 @@ void handleLower(Event e) {
     }
 }
 
-pair<StatusIter, StatusIter> getRange(int e1, int e2, long double cur_y) {
-    auto i1 = getIterator(cur_y, e1);
-    auto i2 = getIterator(cur_y, e2);
+pair<StatusIter, StatusIter> getRange(StatusIter i1, StatusIter i2, long double cur_y) {
     if (distance(i1, T.end()) > distance(i2, T.end())) return {i1, i2};
     return {i2, i1};
 }
@@ -376,21 +401,10 @@ pair<StatusIter, StatusIter> swapSegments(int e1, int e2, long double cur_y) {
     auto i1 = getIterator(cur_y, e1);
     auto i2 = getIterator(cur_y, e2);
     iter_swap(i1, i2);
-    return getRange(e1, e2, cur_y);
+    return getRange(i1, i2, cur_y);
 }
 
-//bool areNeighbours(int e1, int e2, long double cur_y) {
-//    StatusIter iter1 = getIterator(cur_y, e1);
-//    StatusIter iter2 = getIterator(cur_y, e2);
-//    int dist = abs(distance(iter1, T.end()) - distance(iter2, T.end()));
-//    return (dist == 1);
-//}
-
 void handleIntersection(Event e) {
-//    if (!areNeighbours(e.e1, e.e2, e.p.y)) {
-//        holding.emplace(e.p.x, e.p.y, e.e1, e.e2, INTERSECTION);
-//        return;
-//    };
     if (Cache::intersects(e.e1, e.e2)) return;
     if (DEBUG) cout << "[DEBUG] Intersection between edge:" << e.e1 << " and edge:" << e.e2 << " at (" << e.p.x << ", " << e.p.y << ")" << endl;
     auto swapped = swapSegments(e.e1, e.e2, e.p.y);
@@ -417,6 +431,7 @@ void handleIntersection(Event e) {
 }
 
 void handleBulkIntersection(){
+    if (DEBUG) cout << "[DEBUG] Bulk Intersection between edges: ";
     set<int> edgeNumbers;
     vector<int> edges;
 
@@ -429,11 +444,12 @@ void handleBulkIntersection(){
     for (auto edge: edgeNumbers) {
         edges.push_back(edge);
     }
+
     sort(edges.begin(), edges.end(),  [](int a, int b){ return get_slope(S->at(a)) < get_slope(S->at(b)); });
 
     int min_index = -1;
     for (auto edge: edges) {
-        auto it = find(T.begin(), T.end(), edge);
+        auto it = getIterator(e.p.y, edge);
         if (it != T.end())
         {
             int index = it - T.begin();
@@ -442,10 +458,10 @@ void handleBulkIntersection(){
             }
         }
     }
-
+    int index = min_index;
     for (auto edge: edges) {
-        T[min_index] = edge;
-        min_index++;
+        T[index] = edge;
+        index++;
     }
 
     for (auto edge1: edges) {
@@ -456,20 +472,32 @@ void handleBulkIntersection(){
         }
     }
 
-
-    if (!getQueued(T[min_index], T[min_index-1]) && Edge::intersect(&S->at(T[min_index]), &S->at(T[min_index-1]))) {
-        Point p = intersection_point(T[min_index], T[min_index-1]);
-        if (p.y <= e.p.y) {
-            Q.emplace(p.x, p.y, T[min_index], T[min_index-1], INTERSECTION);
-            setQueued(T[min_index], T[min_index-1]);
+    StatusIter leftEdge = getIterator(e.p.y, T[min_index]);
+    auto left = getEqualityRange(leftEdge, e.p.y);
+    left.second = leftEdge;
+    left.first = leftEdge - 1;
+    for (auto i1 = left.first; i1 != left.second; i1++) {
+        if (!getQueued(*i1, *left.second) && Edge::intersect(&S->at(*i1), &S->at(*left.second))) {
+            Point p = intersection_point(*i1, *left.second);
+            if (p.y <= e.p.y) {
+                Q.emplace(p.x, p.y, *i1, *left.second, INTERSECTION);
+                setQueued(*i1, *left.second);
+            }
         }
     }
-    int max_index = min_index + edges.size();
-    if (!getQueued(T[max_index], T[max_index+1]) && Edge::intersect(&S->at(T[max_index]), &S->at(T[max_index+1]))) {
-        Point p = intersection_point(T[max_index], T[max_index+1]);
-        if (p.y <= e.p.y) {
-            Q.emplace(p.x, p.y, T[max_index], T[max_index+1], INTERSECTION);
-            setQueued(T[max_index], T[max_index+1]);
+
+    int max_index = min_index + edges.size() - 1;
+    StatusIter rightEdge = getIterator(e.p.y, T[max_index]);
+    auto right = getEqualityRange(rightEdge, e.p.y);
+    right.second = rightEdge + 2;
+    right.first = rightEdge;
+    for (auto i1 = right.first; i1 != right.second; i1++) {
+        if (!getQueued(*i1, *right.first) && Edge::intersect(&S->at(*i1), &S->at(*right.first))) {
+            Point p = intersection_point(*i1, *right.first);
+            if (p.y <= e.p.y) {
+                Q.emplace(p.x, p.y, *i1, *right.first, INTERSECTION);
+                setQueued(*i1, *right.first);
+            }
         }
     }
 
@@ -504,32 +532,32 @@ void Sweepline::sweep(vector<Edge> *set) {
             }
         }
 
-        Edge left = S->at(S->size() - 2);
+//        Edge left = S->at(S->size() - 2);
+//        vector<int> old = T;
+//
+//        cout.precision(20);
+//        long double prev_x = left.v1->x - 1;
+//
+//        bool cancer = false;
+//        for (auto el : T) {
+//            long double new_x = get_x_on_e_with_y(S->at(el), e.p.y);
+//            if (prev_x - new_x > 0.00001) {
+//                cout << "KANKER " << el << endl;
+//                cancer = true;
+//            }
+//            prev_x = new_x;
+//        }
+//        if (cancer) printStatus(e.p.y);
+//        if (cancer)  break;
 
-        cout.precision(20);
-//        printStatus(e.p.y);
-        long double prev_x = left.v1->x - 1;
 
-        bool cancer = false;
-        for (auto el : T) {
-            long double new_x = get_x_on_e_with_y(S->at(el), e.p.y);
-            if (prev_x - new_x > 0.00001) {
-                cout << "KANKER " << el << endl;
-                cancer = true;
-            }
-            prev_x = new_x;
-        }
-        if (cancer) printStatus(e.p.y);
-        if (cancer)  break;
-
-
-        if (sum % 10000 == 0) {
+        if (sum % 100000 == 0) {
             auto y = e.p.y;
             long double starty = S->at(S->size() - 1).v1->y;
             long double endy = S->at(S->size() - 1).v2->y;
             long double perc = (starty - y) / (starty - endy) * 100.0;
             cout << "|Q|=" << Q.size() << " |T|=" << T.size() << " %=" << perc << endl;
-        } 
+        }
         if (DEBUG) printStatus(e.p.y);
         sum++;
     }
