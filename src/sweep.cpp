@@ -194,7 +194,7 @@ static StatusIter getIteratorRec(long double x, long double slope, long double y
 //        cout << "midx: " << mid_x << endl;
 //        cout << "T[mid]: " << T[mid] << endl;
 //        cout << (mid_x > x) << endl;
-        long double margin = 0.00000001;
+        long double margin = 0.0000001;
         if (abs(mid_x-x) < margin) {
 //            cout << " close call " << endl;
             int leftIndex = mid;
@@ -432,6 +432,7 @@ void handleIntersection(Event e) {
 
 void handleBulkIntersection(){
     if (DEBUG) cout << "[DEBUG] Bulk Intersection between edges: ";
+
     set<int> edgeNumbers;
     vector<int> edges;
 
@@ -442,8 +443,10 @@ void handleBulkIntersection(){
         edgeNumbers.insert(el.e2);
     }
     for (auto edge: edgeNumbers) {
+//        cout << edge << ", ";
         edges.push_back(edge);
     }
+//    cout << endl;
 
     sort(edges.begin(), edges.end(),  [](int a, int b){ return get_slope(S->at(a)) < get_slope(S->at(b)); });
 
@@ -518,7 +521,8 @@ void Sweepline::sweep(vector<Edge> *set) {
             holding.emplace(e.p.x, e.p.y, e.e1, e.e2, INTERSECTION);
 
             auto iter = Q.begin();
-            while (iter->p.x == e.p.x && iter->p.y == e.p.y && iter->type == INTERSECTION) {
+//            0.00000000001
+            while (abs(iter->p.x-e.p.x) < 0.0000001  && abs(iter->p.y - e.p.y) < 0.00000000001 && iter->type == INTERSECTION) {
                 holding.emplace(iter->p.x, iter->p.y, iter->e1, iter->e2, INTERSECTION);
                 Q.erase(iter);
                 iter = Q.begin();
@@ -531,25 +535,6 @@ void Sweepline::sweep(vector<Edge> *set) {
                 handleBulkIntersection();
             }
         }
-
-//        Edge left = S->at(S->size() - 2);
-//        vector<int> old = T;
-//
-//        cout.precision(20);
-//        long double prev_x = left.v1->x - 1;
-//
-//        bool cancer = false;
-//        for (auto el : T) {
-//            long double new_x = get_x_on_e_with_y(S->at(el), e.p.y);
-//            if (prev_x - new_x > 0.00001) {
-//                cout << "KANKER " << el << endl;
-//                cancer = true;
-//            }
-//            prev_x = new_x;
-//        }
-//        if (cancer) printStatus(e.p.y);
-//        if (cancer)  break;
-
 
         if (sum % 100000 == 0) {
             auto y = e.p.y;
