@@ -1,6 +1,6 @@
 #include "instance.h"
 
-#define edge_limit 2107
+#define edge_limit 100000
 
 
 std::ostream &operator<<(std::ostream &os, Vertex const &v) { 
@@ -34,7 +34,7 @@ Instance::Instance(const string& filepath) {
         int v2i = j["edge_j"][i];
         Edge e(&this->vertices->at(v1i), &this->vertices->at(v2i));
         this->edges->push_back(e);
-        cout << v1i << " " << v2i << " : " << this->vertices->at(v1i) << " - " << this->vertices->at(v2i) << endl;
+//        cout << v1i << " " << v2i << " : " << this->vertices->at(v1i) << " - " << this->vertices->at(v2i) << endl;
     }
     assert((long unsigned int) this->n == this->vertices->size());
     assert((long unsigned int) this->m == this->edges->size());

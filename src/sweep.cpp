@@ -68,6 +68,7 @@ static vector<Edge> *S;
 static vector<int> T;
 // static priority_queue<Event> Q;
 static set<Event> Q;
+static set<Event> holding;
 bitset<MAX_EDGES> queued[MAX_EDGES];
 
 
@@ -179,18 +180,24 @@ Point intersection_point(int i1, int i2) {
 }
 
 static StatusIter getIteratorRec(long double x, long double slope, long double y, int e, int l, int r) {
-//    cout << "Searching for edge " << y << endl;
+    cout << "Searching for edge " << x << " , " << e << " at right " << r << " and left " << l <<endl;
     if (r >= l) {
         int mid = l + (r - l) / 2;
+        cout << "mid: " << mid << endl;
         if (T[mid] == e) {
             return T.begin() + mid;
         }
         Edge mid_e = S->at(T[mid]);
         long double mid_x = get_x_on_e_with_y(mid_e, y);
+        cout << "midx: " << mid_x << endl;
+        cout << "T[mid]: " << T[mid] << endl;
         long double mid_slope = get_slope(mid_e);
-        if (mid_x > x || (mid_x == x && mid_slope > slope)) {
+
+        if (mid_x > x || (mid_x == x && slope < mid_slope)) {
+            cout << "searching left" << endl;
             return getIteratorRec(x, slope, y, e, l, mid - 1);
         } else {
+            cout << "searching right" << endl;
             return getIteratorRec(x, slope, y, e, mid + 1, r);
         }
     }
@@ -284,7 +291,7 @@ pair<StatusIter, StatusIter> getEqualityRange(StatusIter iter, long double y) {
         if (test != start) {
             start = test;
             counter++;
-            if (counter > 1) break;
+            if (counter > 2) break;
         }
     }
 
@@ -296,7 +303,7 @@ pair<StatusIter, StatusIter> getEqualityRange(StatusIter iter, long double y) {
         if (test != start) {
             start = test;
             counter++;
-            if (counter > 1) break;
+            if (counter > 2) break;
         }
     }
 
@@ -372,7 +379,18 @@ pair<StatusIter, StatusIter> swapSegments(int e1, int e2, long double cur_y) {
     return getRange(e1, e2, cur_y);
 }
 
+//bool areNeighbours(int e1, int e2, long double cur_y) {
+//    StatusIter iter1 = getIterator(cur_y, e1);
+//    StatusIter iter2 = getIterator(cur_y, e2);
+//    int dist = abs(distance(iter1, T.end()) - distance(iter2, T.end()));
+//    return (dist == 1);
+//}
+
 void handleIntersection(Event e) {
+//    if (!areNeighbours(e.e1, e.e2, e.p.y)) {
+//        holding.emplace(e.p.x, e.p.y, e.e1, e.e2, INTERSECTION);
+//        return;
+//    };
     if (Cache::intersects(e.e1, e.e2)) return;
     if (DEBUG) cout << "[DEBUG] Intersection between edge:" << e.e1 << " and edge:" << e.e2 << " at (" << e.p.x << ", " << e.p.y << ")" << endl;
     auto swapped = swapSegments(e.e1, e.e2, e.p.y);
@@ -398,6 +416,66 @@ void handleIntersection(Event e) {
     Cache::setIntersect(e.e1, e.e2);
 }
 
+void handleBulkIntersection(){
+    set<int> edgeNumbers;
+    vector<int> edges;
+
+    Event e = *holding.begin();
+
+    for(auto el: holding) {
+        edgeNumbers.insert(el.e1);
+        edgeNumbers.insert(el.e2);
+    }
+    for (auto edge: edgeNumbers) {
+        edges.push_back(edge);
+    }
+    sort(edges.begin(), edges.end(),  [](int a, int b){ return get_slope(S->at(a)) < get_slope(S->at(b)); });
+
+    int min_index = -1;
+    for (auto edge: edges) {
+        auto it = find(T.begin(), T.end(), edge);
+        if (it != T.end())
+        {
+            int index = it - T.begin();
+            if (index < min_index || min_index == -1) {
+                min_index = index;
+            }
+        }
+    }
+
+    for (auto edge: edges) {
+        T[min_index] = edge;
+        min_index++;
+    }
+
+    for (auto edge1: edges) {
+        for (auto edge2: edges) {
+            if (edge1 != edge2) {
+                Cache::setIntersect(edge1, edge2);
+            }
+        }
+    }
+
+
+    if (!getQueued(T[min_index], T[min_index-1]) && Edge::intersect(&S->at(T[min_index]), &S->at(T[min_index-1]))) {
+        Point p = intersection_point(T[min_index], T[min_index-1]);
+        if (p.y <= e.p.y) {
+            Q.emplace(p.x, p.y, T[min_index], T[min_index-1], INTERSECTION);
+            setQueued(T[min_index], T[min_index-1]);
+        }
+    }
+    int max_index = min_index + edges.size();
+    if (!getQueued(T[max_index], T[max_index+1]) && Edge::intersect(&S->at(T[max_index]), &S->at(T[max_index+1]))) {
+        Point p = intersection_point(T[max_index], T[max_index+1]);
+        if (p.y <= e.p.y) {
+            Q.emplace(p.x, p.y, T[max_index], T[max_index+1], INTERSECTION);
+            setQueued(T[max_index], T[max_index+1]);
+        }
+    }
+
+    holding.clear();
+}
+
 void Sweepline::sweep(vector<Edge> *set) {
     S = set;
     insert_endpoints();
@@ -408,9 +486,43 @@ void Sweepline::sweep(vector<Edge> *set) {
         Q.erase(Q.begin());
         if (e.type == UPPER)        handleUpper(e);
         if (e.type == LOWER)        handleLower(e);
-        if (e.type == INTERSECTION) handleIntersection(e);
+        if (e.type == INTERSECTION) {
+            holding.emplace(e.p.x, e.p.y, e.e1, e.e2, INTERSECTION);
+
+            auto iter = Q.begin();
+            while (iter->p.x == e.p.x && iter->p.y == e.p.y && iter->type == INTERSECTION) {
+                holding.emplace(iter->p.x, iter->p.y, iter->e1, iter->e2, INTERSECTION);
+                Q.erase(iter);
+                iter = Q.begin();
+            }
+
+            if (holding.size() == 1) {
+                holding.clear();
+                handleIntersection(e);
+            } else {
+                handleBulkIntersection();
+            }
+        }
+
         Edge left = S->at(S->size() - 2);
+
+        cout.precision(20);
+//        printStatus(e.p.y);
         long double prev_x = left.v1->x - 1;
+
+        bool cancer = false;
+        for (auto el : T) {
+            long double new_x = get_x_on_e_with_y(S->at(el), e.p.y);
+            if (prev_x - new_x > 0.00001) {
+                cout << "KANKER " << el << endl;
+                cancer = true;
+            }
+            prev_x = new_x;
+        }
+        if (cancer) printStatus(e.p.y);
+        if (cancer)  break;
+
+
         if (sum % 10000 == 0) {
             auto y = e.p.y;
             long double starty = S->at(S->size() - 1).v1->y;
