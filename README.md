@@ -1,4 +1,4 @@
-# 2IMA15CG
+# Minimum Partition into Plane Subgraphs (CG:SHOP 2022) for 2IMA15
 
 Repository for participating in [the Fourth Computational Geometry Challenge, as part of CG Week in 
 Berlin, Germany, June 6-10, 2022](https://cgshop.ibr.cs.tu-bs.de/competition/cg-shop-2022/), as part 
