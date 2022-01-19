@@ -194,7 +194,7 @@ static StatusIter getIteratorRec(long double x, long double slope, long double y
 //        cout << "midx: " << mid_x << endl;
 //        cout << "T[mid]: " << T[mid] << endl;
 //        cout << (mid_x > x) << endl;
-        long double margin = 0.000000001;
+        long double margin = 0.00000001;
         if (abs(mid_x-x) < margin) {
 //            cout << " close call " << endl;
             int leftIndex = mid;
