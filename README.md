@@ -22,23 +22,34 @@ The instances/ folder contains the problem instances defined by the challenge. b
 
 `make`
 
+## How to run
+
+`./app {file} {a}`
+
+Where `{file}` is a JSON instance file as described by [the challenge](https://cgshop.ibr.cs.tu-bs.de/competition/cg-shop-2022/#instance-format)
+
+Where `{a}` can be one of the following:
+- `a=1` Standard greedy solver.
+- `a=2` DSatur solver.
+- `a=3` HEA solver.
+
 
 ## Checklist
 
 - [x] Add functionality to read test instances
 - [x] Add functionality to write solutions
-- [ ] Add functionality to visualize instances
 - [x] Define relevant subproblems
 - - [x] Subproblem 1: Find intersections
 - - [x] Subproblem 2: Transform to graph coloring problem
 - - [x] Subproblem 3: Solve graph coloring problem
-- [ ] Implement algorithms to solve the defined subproblems 
-- - [ ] Sweepline algorithm for finding intersections
+- [x] Implement algorithms to solve the defined subproblems 
+- - [x] Bruteforce algorithm for finding intersections
+- - [x] Sweepline algorithm for finding intersections
 - - [x] Transformation to graph coloring instance
 - - [x] Greedy algorithm for graph coloring
-- - [x] Greedy (degree variant) algorithm for graph coloring
-- - [x] Greedy (saturation variant) algorithm for graph coloring
-- - [x] Tabu search algorithm for graph coloring
-- - [ ] Evolutionary algorithm for graph coloring
-- [ ] Implement an algorithm to solve the main problem
-- [ ] Generate additional test instances
+- - [x] Greedy based on degree algorithm for graph coloring
+- - [x] Greedy based on saturation (DSatur) algorithm for graph coloring
+- - [x] Tabu search algorithm (TabuCol) for graph coloring
+- - [x] Evolutionary algorithm (HEA) for graph coloring
+- [x] Implement an algorithm to solve the main problem
+- [x] Generate additional test instances
