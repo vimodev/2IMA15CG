@@ -24,7 +24,10 @@ void Cache::set_instance(Instance *pInstance) {
 
     cout << "[INFO] Starting preparation." << endl;
 
+    auto start = std::chrono::high_resolution_clock::now();
     Sweepline::sweep(edges);
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto durationSweepLine = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
     int sum = 0;
     for (int i = 0; i < pInstance->m; i++) {
         for (int j = i + 1; j < pInstance->m; j++) {
@@ -34,23 +37,25 @@ void Cache::set_instance(Instance *pInstance) {
     cout << "\n  -- INTERSECTION  SUMMARY --  " << endl;
     cout << "        Found    : " << sum << endl;
 
+    start = std::chrono::high_resolution_clock::now();
+
     #pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < pInstance->m; i++) {
         for (int j = i + 1; j < pInstance->m; j++) {
             int intersect = Edge::intersect(&edges->at(i), &edges->at(j));
-            if (!intersect && cache[i][j]) {
-                cout << "Falsely " << i << ", " << j << endl;
-            }
             if (cache[i][j]) continue;
             if (intersect) {
-                // cout << i << " " << j << endl;
                 counts[i] += 1;
                 counts[j] += 1;
             }
             cache[i][j] = intersect;
         }
     }
-    
+
+    stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+    cout << "        BRUTEFORCE: " << duration.count() << endl;
+    cout << "        SWEEPLINE : " << durationSweepLine.count() << endl;
     int sum2 = 0;
     for (int i = 0; i < pInstance->m; i++) {
         for (int j = i + 1; j < pInstance->m; j++) {
@@ -58,7 +63,7 @@ void Cache::set_instance(Instance *pInstance) {
         }
     }
     cout << "        Actual   : " << sum2 << endl;
-    cout << "        Accuracy : " << (sum*100/sum2) << "%" << endl;
+    cout << "        Accuracy : " << (sum*100.0/sum2) << "%" << endl;
     cout << "  - - - - - - - - - - - - - -  \n" << endl;
 
 
