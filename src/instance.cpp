@@ -1,7 +1,5 @@
 #include "instance.h"
 
-#define edge_limit 100000
-
 
 std::ostream &operator<<(std::ostream &os, Vertex const &v) { 
             return os << "(" << v.x << "," << v.y << ")";
@@ -20,7 +18,7 @@ Instance::Instance(const string& filepath) {
     this->id = j["id"];
     this->n = j["n"];
     this->m = j["m"];
-    this->m = min(this->m, edge_limit);
+    this->m = min(this->m, MAX_EDGES);
     // Populate vertices
     this->vertices = new vector<Vertex>;
     for (int i = 0; i < this->n; i++) {
@@ -29,7 +27,7 @@ Instance::Instance(const string& filepath) {
     }
     // Populate edges
     this->edges = new vector<Edge>;
-    for (int i = 0; i < min((int) j["m"], edge_limit); i++) {
+    for (int i = 0; i < min((int) j["m"], MAX_EDGES); i++) {
         int v1i = j["edge_i"][i];
         int v2i = j["edge_j"][i];
         Edge e(&this->vertices->at(v1i), &this->vertices->at(v2i));

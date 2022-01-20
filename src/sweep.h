@@ -25,6 +25,12 @@ enum EventType {
 
 class Event {
     public:
+    string toString(){
+        std::ostringstream ss;
+        ss << "[EVENT] " << this->type << " at " << this->p.y << " with: " << e1 << " and " << e2;
+        std::string str = ss.str();
+        return str;
+    }
         Event(long double x, long double y, int e1, int e2, EventType type);
         friend bool operator<(Event const& lhs, Event const& rhs) {
             if (lhs.p.y == rhs.p.y) {
