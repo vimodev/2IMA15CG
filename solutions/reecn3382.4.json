@@ -1,0 +1,18 @@
+{
+    "colors": [
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        2,
+        3,
+        1,
+        2,
+        3
+    ],
+    "instance": "reecn3382",
+    "num_colors": 4,
+    "type": "Solution_CGSHOP2022"
+}
