@@ -31,6 +31,10 @@ Instance::Instance(const string& filepath) {
         int v1i = j["edge_i"][i];
         int v2i = j["edge_j"][i];
         Edge e(&this->vertices->at(v1i), &this->vertices->at(v2i));
+//        cout << (e.v1->y == e.v2-> y) << endl;
+//        assert(e.v1->y != e.v2-> y);
+//        cout << (e.v1->x == e.v2->x) << endl;
+        assert(e.v1->x != e.v2-> x);
         this->edges->push_back(e);
 //        cout << v1i << " " << v2i << " : " << this->vertices->at(v1i) << " - " << this->vertices->at(v2i) << endl;
     }
