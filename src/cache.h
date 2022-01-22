@@ -11,6 +11,7 @@ using namespace std;
 class Cache {
     public:
         static void set_instance(Instance *pInstance);
+        static std::tuple<std::chrono::duration<float, std::milli>, std::chrono::duration<float, std::milli>> benchmark(Instance *pInstance);
         static bool intersects(int i, int j);
         static int get_count(int i);
         static bool initialized;

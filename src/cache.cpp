@@ -63,7 +63,7 @@ void Cache::set_instance(Instance *pInstance) {
         }
     }
     cout << "        Actual   : " << sum2 << endl;
-    cout << "        Accuracy : " << (sum*100.0/sum2) << "%" << endl;
+    cout << "        Accuracy : " << (sum * 100.0 / sum2) << "%" << endl;
     cout << "  - - - - - - - - - - - - - -  \n" << endl;
 
 
@@ -82,6 +82,7 @@ void Cache::set_instance(Instance *pInstance) {
     Cache::initialized = true;
     cout << "[INFO] Adjacency cache filled." << endl;
 }
+
 void Cache::setIntersect(int i, int j) {
     if (i > j) setIntersect(j, i);
     cache[i][j] = true;
@@ -100,4 +101,61 @@ int Cache::get_count(int i) {
 
 vector<int> *Cache::neighbours(int i) {
     return adjacency_list[i];
+}
+
+std::tuple<std::chrono::duration<float, std::milli>, std::chrono::duration<float, std::milli>> Cache::benchmark(Instance *pInstance) {
+    Cache::instance = pInstance;
+
+    // Initialize adjacency_lists with empty vectors.
+    for (int i = 0; i < pInstance->m; i++) {
+        adjacency_list[i] = new vector<int>();
+    }
+
+    vector<Edge> *edges = pInstance->edges;
+
+    cout << "[INFO] Benching " << pInstance->id << endl;
+    auto start = std::chrono::high_resolution_clock::now();
+    Sweepline::sweep(edges);
+    auto stop = std::chrono::high_resolution_clock::now();
+
+    auto durationSweepLine = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+    long sum = 0;
+    for (int i = 0; i < pInstance->m; i++) {
+        for (int j = i + 1; j < pInstance->m; j++) {
+            if (cache[i][j]) sum++;
+        }
+    }
+
+    cout << "[INFO] Found: " << sum << " / ";
+
+    start = std::chrono::high_resolution_clock::now();
+
+    #pragma omp parallel for schedule(dynamic)
+    for (int i = 0; i < pInstance->m; i++) {
+        for (int j = i + 1; j < pInstance->m; j++) {
+            int intersect = Edge::intersect(&edges->at(i), &edges->at(j));
+            if (cache[i][j]) continue;
+            if (intersect) {
+                counts[i] += 1;
+                counts[j] += 1;
+            }
+            cache[i][j] = intersect;
+        }
+    }
+
+    stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+
+    long sum2 = 0;
+    for (int i = 0; i < pInstance->m; i++) {
+        for (int j = i + 1; j < pInstance->m; j++) {
+            if (cache[i][j]) sum2++;
+        }
+    }
+
+    cout << sum2 << " = ";
+    cout << (sum * 100.0 / sum2) << "%" << endl;
+    Cache::initialized = true;
+    delete Sweepline::S;
+    return { duration, durationSweepLine };
 }
